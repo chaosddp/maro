@@ -2,18 +2,11 @@
 name: test
 
 on:
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'warning'
-      tags:
-        description: 'Test scenario tags'
   push:
-    branches: [ master, v0.1 ]
+    branches: [ master, v0.1, v0.2 ]
   pull_request:
-    branches: [ master, v0.1 ]
+    branches: [ master, v0.1, v0.2 ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -32,9 +25,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install build dependencies
-      run: | 
+      run: |
         pip install -r maro/requirements.build.txt
-    
+
     - name: Compile cython files
       run: |
         cython ./maro/backends/backend.pyx ./maro/backends/np_backend.pyx ./maro/backends/raw_backend.pyx ./maro/backends/frame.pyx -3 -E FRAME_BACKEND=NUMPY,NODES_MEMORY_LAYOUT=ONE_BLOCK -X embedsignature=True
@@ -60,10 +53,10 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings.
         flake8 . --count --exit-zero --max-complexity=10 --statistics
-        
+
     - name: test on windows
       if: runner.os == 'Windows'
-      env: 
+      env:
         PYTHONPATH: .;./tests
       run: |
         coverage run --rcfile=./tests/.coveragerc
@@ -75,4 +68,15 @@ jobs:
         PYTHONPATH: .:./tests
       run: |
         coverage run --rcfile=./tests/.coveragerc
-        coverage report --rcfile=./tests/.coveragerc
+        coverage xml --rcfile=./tests/.coveragerc
+    - name: Upload coverage to Codecov
+      if: runner.os == 'Linux'
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: maro-code-coverage
+        fail_ci_if_error: true
+        path_to_write_report: ./codecov_report.gz
