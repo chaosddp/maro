@@ -50,7 +50,7 @@ namespace maro
             ULONGLONG reserved4{0ULL};
 
             // write to buffer, and return size wrote
-            size_t write(char *buffer);
+            // size_t write(char *buffer);
         };
 
     } // namespace datalib

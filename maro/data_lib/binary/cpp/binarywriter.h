@@ -50,12 +50,15 @@ namespace maro
 
             Meta _meta;
 
-            char _buffer[1024];
+            char _buffer[4096];
 
             map<int, int> _col2field_map;
 
             void construct_column_mapping(const CSV::Row& header);
             void write_header();
+
+            void write_meta();
+            
         };
     } // namespace datalib
 

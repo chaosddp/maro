@@ -169,13 +169,37 @@ namespace maro
             }
         }
 
+
+#define WriteToBuffer(size, src) \
+    length = size; \
+    memcpy(&_buffer[offset], &src, length); \
+    offset += length;
+
+
         void BinaryWriter::write_header()
         {
             _file.seekp(0, ios::beg);
 
-            auto size = _header.write(_buffer);
+            size_t offset = 0ULL;
+            size_t length = 0ULL;
 
-            _file.write(_buffer, size);
+            WriteToBuffer(strlen(_header.identifier), _header.identifier)
+            WriteToBuffer(sizeof(unsigned char), _header.file_type)
+            WriteToBuffer(sizeof(UINT), _header.converter_version)
+            WriteToBuffer(sizeof(UINT), _header.file_version)
+            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
+            WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
+            WriteToBuffer(sizeof(UINT), _header.item_size)
+            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
+
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
+
+            _file.write(_buffer, offset );
         }
 
     } // namespace datalib
