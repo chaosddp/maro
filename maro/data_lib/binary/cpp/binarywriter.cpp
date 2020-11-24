@@ -7,9 +7,34 @@ namespace maro
 {
     namespace datalib
     {
-        inline ULONGLONG to_timestamp(string &val_str)
+        inline void calc_local_utc_offset()
         {
-            return 0ULL;
+            time_t rawtime;
+            struct tm* ptm;
+
+            time(&rawtime);
+
+            ptm = gmtime(&rawtime);
+
+            auto t2 = mktime(ptm);
+
+            local_utc_offset = unsigned char(labs(t2 - rawtime)/SECONDS_PER_HOUR);
+        }
+
+
+        inline ULONGLONG to_timestamp(string &val_str, char utc_offset=0)
+        {
+            tm t{};
+            istringstream ss(val_str);
+            ss >> get_time(&t, "%Y-%m-%d %H:%M:%S");
+
+            auto t3 = mktime(&t);
+
+            struct tm* ptm;
+
+            auto t4 = t3 + (local_utc_offset - utc_offset) * SECONDS_PER_HOUR;
+
+            return t4;
         }
 
         inline short to_short(string &val_str)
@@ -56,6 +81,11 @@ namespace maro
 
         BinaryWriter::BinaryWriter(string output_folder, string file_name, string file_type, int32_t file_version)
         {
+            if(local_utc_offset == MINCHAR)
+            {
+                calc_local_utc_offset();
+            }
+
             auto bin_file = output_folder + "/" + file_name + ".bin";
 
             _file.open(bin_file, ios::out | ios::binary);
@@ -67,6 +97,9 @@ namespace maro
 
         BinaryWriter::~BinaryWriter()
         {
+            // update header before close
+            write_header();
+            
             _file.flush();
             _file.close();
         }
@@ -184,6 +217,8 @@ namespace maro
 
                     if (offset > 0)
                     {
+                         _header.total_items++;
+
                         _file.write(_buffer, offset);
                     }
                 }

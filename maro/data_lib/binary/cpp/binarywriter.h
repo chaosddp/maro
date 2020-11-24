@@ -4,6 +4,7 @@
 #ifndef _MARO_DATALIB_BINARY_WRITER_
 #define _MARO_DATALIB_BINARY_WRITER_
 
+#include <time.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -27,6 +28,9 @@ namespace maro
         const unsigned char FILE_TYPE_BIN = 1;
         const unsigned char FILE_TYPE_INDEX = 2;
         const uint32_t CONVERTER_VERSION = 100;
+        
+        const int SECONDS_PER_HOUR = 60 * 60;
+        static char local_utc_offset = MINCHAR;
 
         class BinaryWriter
         {
