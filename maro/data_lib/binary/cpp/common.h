@@ -23,6 +23,7 @@ namespace maro
         2 bytes - custimized file type (2 char)
         8 bytes - total items
         4 bytes - item size
+        1 byte - utc offset
         8 bytes - start timestamp (real)
         8 bytes - end timestamp (real)
         4 bytes - meta size (meta just follow header)
@@ -34,6 +35,7 @@ namespace maro
 
             char custom_file_type[3]{"NA"};
             char identifier[5]{"MARO"};
+            char utc_offset{0};
 
             UINT converter_version{0U};
             UINT file_version{0U};

@@ -65,7 +65,16 @@ namespace maro
                 offset += size;
             }
 
-            meta.timezone = toml::find<string>(data, "timezone");
+            try
+            {
+                meta.utc_offset = toml::find<char>(data, "utc_offset");
+            }
+            catch(std::out_of_range)
+            {
+                std::cerr << "Cannot find UTC offset, use 0." << '\n';
+            }
+            
+            
         }
 
     } // namespace datalib

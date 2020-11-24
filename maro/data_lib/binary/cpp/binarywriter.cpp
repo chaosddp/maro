@@ -78,6 +78,7 @@ namespace maro
             parser.parse(meta_file, _meta);
 
             _header.item_size = _meta.itemsize();
+            _header.utc_offset = _meta.utc_offset;
 
             write_meta();
 
@@ -234,22 +235,23 @@ namespace maro
             size_t length = 0ULL;
 
             WriteToBuffer(strlen(_header.identifier), _header.identifier)
-                WriteToBuffer(sizeof(unsigned char), _header.file_type)
-                    WriteToBuffer(sizeof(UINT), _header.converter_version)
-                        WriteToBuffer(sizeof(UINT), _header.file_version)
-                            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
-                                WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
-                                    WriteToBuffer(sizeof(UINT), _header.item_size)
-                                        WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
-                                            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
-                                                WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
+            WriteToBuffer(sizeof(unsigned char), _header.file_type)
+            WriteToBuffer(sizeof(UINT), _header.converter_version)
+            WriteToBuffer(sizeof(UINT), _header.file_version)
+            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
+            WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
+            WriteToBuffer(sizeof(UINT), _header.item_size)
+            WriteToBuffer(sizeof(char), _header.utc_offset)
+            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
 
-                                                    WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
-                                                        WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
-                                                            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
-                                                                WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
 
-                                                                    _header.meta_size += offset;
+            _header.meta_size += offset;
 
             _file.write(_buffer, offset);
 

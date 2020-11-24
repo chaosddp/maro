@@ -42,7 +42,7 @@ namespace maro
 
         struct Meta
         {
-            string timezone;
+            char utc_offset{0};
 
             vector<Field> fields;
 

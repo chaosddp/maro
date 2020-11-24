@@ -1,5 +1,6 @@
 
-timezone = "America/New_York" # can without this, then it will be UTC
+# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+utc_offset = -5 # can without this, then it will be 0 (UTC)
 
 
 [[row]] # row definition
