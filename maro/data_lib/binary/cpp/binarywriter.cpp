@@ -263,26 +263,23 @@ namespace maro
             size_t length = 0ULL;
 
             WriteToBuffer(strlen(_header.identifier), _header.identifier)
-                WriteToBuffer(sizeof(unsigned char), _header.file_type)
-                    WriteToBuffer(sizeof(UINT), _header.converter_version)
-                        WriteToBuffer(sizeof(UINT), _header.file_version)
-                            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
-                                WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
-                                    WriteToBuffer(sizeof(UINT), _header.item_size)
-                                        WriteToBuffer(sizeof(char), _header.utc_offset)
-                                            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
-                                                WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
-                                                    WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
+            WriteToBuffer(sizeof(unsigned char), _header.file_type)
+            WriteToBuffer(sizeof(UINT), _header.converter_version)
+            WriteToBuffer(sizeof(UINT), _header.file_version)
+            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
+            WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
+            WriteToBuffer(sizeof(UINT), _header.item_size)
+            WriteToBuffer(sizeof(char), _header.utc_offset)
+            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
+            WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
 
-                                                        WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
-                                                            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
-                                                                WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
-                                                                    WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
-
-                                                                        _header.meta_size += offset;
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
+            WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
 
             _file.write(_buffer, offset);
-
             _file.seekp(0, ios::end);
         }
 
@@ -303,11 +300,16 @@ namespace maro
                 size_t length = 0ULL;
 
                 WriteToBuffer(sizeof(uint32_t), field.start_index)
-                    WriteToBuffer(sizeof(unsigned char), field.type) auto alias_length = field.alias.size();
-                WriteToBuffer(sizeof(unsigned short), alias_length)
-                    WriteToBuffer(alias_length, field.alias[0])
+                WriteToBuffer(sizeof(unsigned char), field.type) 
 
-                        _file.write(_buffer, offset);
+                auto alias_length = field.alias.size();
+
+                WriteToBuffer(sizeof(unsigned short), alias_length)
+                WriteToBuffer(alias_length, field.alias[0])
+
+                _file.write(_buffer, offset);
+
+                 _header.meta_size += offset;
             }
         }
 
