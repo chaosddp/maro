@@ -9,28 +9,35 @@ namespace maro
     {
         inline ULONGLONG to_timestamp(string &val_str)
         {
-            return ULONGLONG();
+            return 0ULL;
         }
+
         inline short to_short(string &val_str)
         {
-            return short();
+            return short(stoi(val_str));
         }
+
         inline int32_t to_int(string &val_str)
         {
-            return int32_t();
+            return int32_t(stoi(val_str));
         }
+
         inline LONGLONG to_long(string &val_str)
         {
-            return LONGLONG();
+            // return stoll(val_str);
+            return 0LL;
         }
+
         inline float to_float(string &val_str)
         {
-            return float();
+            return stof(val_str);
         }
+
         inline double to_double(string &val_str)
         {
-            return double();
+            return stod(val_str);
         }
+
         inline void strip(string &str)
         {
             if (str.size() > 0)
@@ -45,8 +52,6 @@ namespace maro
                     str.erase(str.size() - 1);
                 }
             }
-
-            
         }
 
         BinaryWriter::BinaryWriter(string output_folder, string file_name, string file_type, int32_t file_version)
@@ -56,7 +61,7 @@ namespace maro
             _file.open(bin_file, ios::out | ios::binary);
 
             _header.file_type = FILE_TYPE_BIN;
-            
+
             write_header();
         }
 
@@ -73,7 +78,10 @@ namespace maro
             parser.parse(meta_file, _meta);
 
             _header.item_size = _meta.itemsize();
-            
+
+            write_meta();
+
+            write_header();
         }
 
         void BinaryWriter::add_csv(string csv_file)
@@ -90,6 +98,8 @@ namespace maro
                 for (const auto row : csv)
                 {
                     i = 0;
+                    auto length = 0;
+                    auto offset = 0;
 
                     for (const auto cell : row)
                     {
@@ -107,31 +117,73 @@ namespace maro
 
                             switch (field.type)
                             {
-                            case 0:
-                                // byte
-                                break;
                             case 1:
+                            {
                                 // short
-                                break;
-                            case 2:
-                                // int
-                                break;
-                            case 3:
-                                // long
-                                break;
-                            case 4:
-                                // float
-                                break;
-                            case 5:
-                                // double
-                                break;
+                                auto rv = to_short(v);
+                                length = sizeof(short);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
 
+                                break;
+                            }
+                            case 2:
+                            {
+                                // int
+                                auto rv = to_int(v);
+                                length = sizeof(int32_t);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
+
+                                break;
+                            }
+                            case 3:
+                            { // long
+                                auto rv = to_long(v);
+                                length = sizeof(LONGLONG);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
+
+                                break;
+                            }
+                            case 4:
+                            { // float
+                                auto rv = to_float(v);
+                                length = sizeof(float);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
+
+                                break;
+                            }
+                            case 5:
+                            { // double
+                                auto rv = to_double(v);
+                                length = sizeof(double);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
+
+                                break;
+                            }
+                            case 6:
+                            {
+                                // timestamp
+                                auto rv = to_timestamp(v);
+                                length = sizeof(ULONGLONG);
+                                memcpy(&_buffer[offset], &rv, length);
+                                offset += length;
+                                break;
+                            }
                             default:
                                 break;
                             }
                         }
 
                         i++;
+                    }
+
+                    if (offset > 0)
+                    {
+                        _file.write(_buffer, offset);
                     }
                 }
             }
@@ -169,12 +221,10 @@ namespace maro
             }
         }
 
-
-#define WriteToBuffer(size, src) \
-    length = size; \
+#define WriteToBuffer(size, src)            \
+    length = size;                          \
     memcpy(&_buffer[offset], &src, length); \
     offset += length;
-
 
         void BinaryWriter::write_header()
         {
@@ -184,22 +234,51 @@ namespace maro
             size_t length = 0ULL;
 
             WriteToBuffer(strlen(_header.identifier), _header.identifier)
-            WriteToBuffer(sizeof(unsigned char), _header.file_type)
-            WriteToBuffer(sizeof(UINT), _header.converter_version)
-            WriteToBuffer(sizeof(UINT), _header.file_version)
-            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
-            WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
-            WriteToBuffer(sizeof(UINT), _header.item_size)
-            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
-            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
-            WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
+                WriteToBuffer(sizeof(unsigned char), _header.file_type)
+                    WriteToBuffer(sizeof(UINT), _header.converter_version)
+                        WriteToBuffer(sizeof(UINT), _header.file_version)
+                            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
+                                WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
+                                    WriteToBuffer(sizeof(UINT), _header.item_size)
+                                        WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
+                                            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
+                                                WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
 
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
+                                                    WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
+                                                        WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
+                                                            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
+                                                                WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
 
-            _file.write(_buffer, offset );
+                                                                    _header.meta_size += offset;
+
+            _file.write(_buffer, offset);
+
+            _file.seekp(0, ios::end);
+        }
+
+        void BinaryWriter::write_meta()
+        {
+            /*
+            Each field info if a pair of name and index:
+
+            4 bytes - start index (in bytes) in binary block
+            1 byte - filed type
+            2 bytes - field name length
+            N bytes - filed name that length same as above specified
+            */
+
+            for (auto &field : _meta.fields)
+            {
+                size_t offset = 0ULL;
+                size_t length = 0ULL;
+
+                WriteToBuffer(sizeof(uint32_t), field.start_index)
+                    WriteToBuffer(sizeof(unsigned char), field.type) auto alias_length = field.alias.size();
+                WriteToBuffer(sizeof(unsigned short), alias_length)
+                    WriteToBuffer(alias_length, field.alias[0])
+
+                        _file.write(_buffer, offset);
+            }
         }
 
     } // namespace datalib

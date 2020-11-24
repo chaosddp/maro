@@ -4,6 +4,7 @@
 #ifndef _MARO_DATALIB_METAPARSER_
 #define _MARO_DATALIB_METAPARSER_
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -18,13 +19,13 @@ namespace maro
     namespace datalib
     {
         static unordered_map<string, pair<unsigned char, size_t>> field_dtype = {
-            {"b", {0, sizeof(char)}},
-            {"i2", {1, sizeof(short)}},
+            {"s", {1, sizeof(short)}},
             {"i", {2, sizeof(int32_t)}},
-            {"i4", {2, sizeof(int32_t)}},
-            {"i8", {3, sizeof(unsigned long long)}},
+            {"l", {3, sizeof(long long)}},
             {"f", {4, sizeof(float)}},
-            {"d", {5, sizeof(double)}}};
+            {"d", {5, sizeof(double)}},
+            {"t", {6, sizeof(ULONGLONG)}},
+        };
 
         struct Field
         {
@@ -34,9 +35,9 @@ namespace maro
             string column;
             string alias;
 
-            Field(string alias, string column, uint32_t size, uint32_t start_index);
+            Field(string alias, string column, uint32_t size, uint32_t start_index, unsigned char dtype);
 
-            UINT write(char* buffer);
+            UINT write(char *buffer);
         };
 
         struct Meta
@@ -47,8 +48,8 @@ namespace maro
 
             uint32_t itemsize();
 
-            template<typename... Args>
-            void add_field(Args&&... args);
+            template <typename... Args>
+            void add_field(Args &&... args);
         };
 
         // load meta and parse, return fields info
@@ -58,7 +59,6 @@ namespace maro
         public:
             MetaParser();
 
-            // do use rvalue ref to call this
             void parse(string meta_file, Meta &meta);
         };
     } // namespace datalib
