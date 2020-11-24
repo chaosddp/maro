@@ -50,6 +50,8 @@ namespace maro
 
             uint32_t offset = 0U;
 
+            bool has_timestamp = false;
+
             for (auto col : row)
             {
                 // parse each column definition
@@ -57,12 +59,28 @@ namespace maro
                 auto type = col["type"].as_string();
                 auto alias = col["alias"].as_string();
 
+                if(alias == "timestamp")
+                {
+                    has_timestamp = true;
+
+                    // check the data type
+                    if(type != "t")
+                    {
+                        throw out_of_range("Incorrect timestamp type.");
+                    }
+                }
+
                 auto kv = field_dtype.find(type);
                 auto size = uint32_t(kv->second.second);
 
                 meta.fields.emplace_back(alias, col_name, size, offset, kv->second.first);
 
                 offset += size;
+            }
+
+            if(!has_timestamp)
+            {
+                throw overflow_error("Must contains timestamp definition.");
             }
 
             try

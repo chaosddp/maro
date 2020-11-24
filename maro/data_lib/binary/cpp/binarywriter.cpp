@@ -7,10 +7,10 @@ namespace maro
 {
     namespace datalib
     {
-        inline void calc_local_utc_offset()
+        inline char calc_local_utc_offset()
         {
             time_t rawtime;
-            struct tm* ptm;
+            struct tm *ptm;
 
             time(&rawtime);
 
@@ -18,19 +18,20 @@ namespace maro
 
             auto t2 = mktime(ptm);
 
-            local_utc_offset = unsigned char(labs(t2 - rawtime)/SECONDS_PER_HOUR);
+            return char((rawtime - t2) / SECONDS_PER_HOUR);
         }
 
-
-        inline ULONGLONG to_timestamp(string &val_str, char utc_offset=0)
+        inline ULONGLONG to_timestamp(string &val_str, unsigned char local_utc_offset = 0, char utc_offset = 0)
         {
+            // TODO: need to test on US timezone
+
             tm t{};
             istringstream ss(val_str);
             ss >> get_time(&t, "%Y-%m-%d %H:%M:%S");
 
             auto t3 = mktime(&t);
 
-            struct tm* ptm;
+            struct tm *ptm;
 
             auto t4 = t3 + (local_utc_offset - utc_offset) * SECONDS_PER_HOUR;
 
@@ -49,8 +50,7 @@ namespace maro
 
         inline LONGLONG to_long(string &val_str)
         {
-            // return stoll(val_str);
-            return 0LL;
+            return stoll(val_str);
         }
 
         inline float to_float(string &val_str)
@@ -63,28 +63,9 @@ namespace maro
             return stod(val_str);
         }
 
-        inline void strip(string &str)
-        {
-            if (str.size() > 0)
-            {
-                if (str[0] == '\"')
-                {
-                    str.erase(0, 1);
-                }
-
-                if (str[str.size() - 1] == '\"')
-                {
-                    str.erase(str.size() - 1);
-                }
-            }
-        }
-
         BinaryWriter::BinaryWriter(string output_folder, string file_name, string file_type, int32_t file_version)
         {
-            if(local_utc_offset == MINCHAR)
-            {
-                calc_local_utc_offset();
-            }
+            local_utc_offset = calc_local_utc_offset();
 
             auto bin_file = output_folder + "/" + file_name + ".bin";
 
@@ -99,7 +80,7 @@ namespace maro
         {
             // update header before close
             write_header();
-            
+
             _file.flush();
             _file.close();
         }
@@ -201,10 +182,24 @@ namespace maro
                             case 6:
                             {
                                 // timestamp
-                                auto rv = to_timestamp(v);
+                                auto rv = to_timestamp(v, local_utc_offset, _meta.utc_offset);
                                 length = sizeof(ULONGLONG);
                                 memcpy(&_buffer[offset], &rv, length);
                                 offset += length;
+
+                                // update header
+                                if (field.alias == "timestamp")
+                                {
+                                    if (_header.start_timestamp == 0ULL)
+                                    {
+                                        _header.start_timestamp = rv;
+
+                                        cout << rv << endl;
+                                    }
+
+                                    _header.end_timestamp = rv;
+                                }
+
                                 break;
                             }
                             default:
@@ -217,7 +212,7 @@ namespace maro
 
                     if (offset > 0)
                     {
-                         _header.total_items++;
+                        _header.total_items++;
 
                         _file.write(_buffer, offset);
                     }
@@ -242,8 +237,6 @@ namespace maro
                     string hstr;
 
                     h.read_value(hstr);
-
-                    strip(hstr);
 
                     if (hstr == field.column)
                     {
@@ -270,23 +263,23 @@ namespace maro
             size_t length = 0ULL;
 
             WriteToBuffer(strlen(_header.identifier), _header.identifier)
-            WriteToBuffer(sizeof(unsigned char), _header.file_type)
-            WriteToBuffer(sizeof(UINT), _header.converter_version)
-            WriteToBuffer(sizeof(UINT), _header.file_version)
-            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
-            WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
-            WriteToBuffer(sizeof(UINT), _header.item_size)
-            WriteToBuffer(sizeof(char), _header.utc_offset)
-            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
-            WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
-            WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
+                WriteToBuffer(sizeof(unsigned char), _header.file_type)
+                    WriteToBuffer(sizeof(UINT), _header.converter_version)
+                        WriteToBuffer(sizeof(UINT), _header.file_version)
+                            WriteToBuffer(strlen(_header.custom_file_type), _header.custom_file_type)
+                                WriteToBuffer(sizeof(ULONGLONG), _header.total_items)
+                                    WriteToBuffer(sizeof(UINT), _header.item_size)
+                                        WriteToBuffer(sizeof(char), _header.utc_offset)
+                                            WriteToBuffer(sizeof(ULONGLONG), _header.start_timestamp)
+                                                WriteToBuffer(sizeof(ULONGLONG), _header.end_timestamp)
+                                                    WriteToBuffer(sizeof(ULONGLONG), _header.meta_size)
 
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
-            WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
+                                                        WriteToBuffer(sizeof(ULONGLONG), _header.reserved1)
+                                                            WriteToBuffer(sizeof(ULONGLONG), _header.reserved2)
+                                                                WriteToBuffer(sizeof(ULONGLONG), _header.reserved3)
+                                                                    WriteToBuffer(sizeof(ULONGLONG), _header.reserved4)
 
-            _header.meta_size += offset;
+                                                                        _header.meta_size += offset;
 
             _file.write(_buffer, offset);
 

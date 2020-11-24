@@ -18,7 +18,7 @@ using namespace std;
 using CSV = csv2::Reader<csv2::delimiter<','>,
                          csv2::quote_character<'\"'>,
                          csv2::first_row_is_header<true>,
-                         csv2::trim_policy::trim_whitespace>;
+                         csv2::trim_policy::trim_characters<' ', '\"'>>;
 
 namespace maro
 {
@@ -30,7 +30,6 @@ namespace maro
         const uint32_t CONVERTER_VERSION = 100;
         
         const int SECONDS_PER_HOUR = 60 * 60;
-        static char local_utc_offset = MINCHAR;
 
         class BinaryWriter
         {
@@ -47,7 +46,11 @@ namespace maro
             // load and convert
             void add_csv(string csv_file);
 
+            
+
         private:
+            char local_utc_offset = MINCHAR;
+
             // seams FILE is faster than ofstream
             ofstream _file;
             BinHeader _header;
