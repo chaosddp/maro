@@ -15,6 +15,15 @@ namespace maro
         using ULONGLONG = unsigned long long;
         using UINT = uint32_t;
 
+        const string MARO = "maro";
+        const unsigned char FILE_TYPE_BIN = 1;
+        const unsigned char FILE_TYPE_INDEX = 2;
+        const uint32_t CONVERTER_VERSION = 100;
+        
+        const int SECONDS_PER_HOUR = 60 * 60;
+
+        const int BUFFER_LENGTH = 4096;
+
         /*
         4 bytes - identifier "maro"
         1 byte - file type (0: reserved, 1: binary, 2: index)
@@ -53,6 +62,35 @@ namespace maro
 
             // write to buffer, and return size wrote
             // size_t write(char *buffer);
+        };
+
+        static unordered_map<string, pair<unsigned char, size_t>> field_dtype = {
+            {"s", {1, sizeof(short)}},
+            {"i", {2, sizeof(int32_t)}},
+            {"l", {3, sizeof(long long)}},
+            {"f", {4, sizeof(float)}},
+            {"d", {5, sizeof(double)}},
+            {"t", {6, sizeof(ULONGLONG)}},
+        };
+
+        struct Field
+        {
+            unsigned char type{2};
+            uint32_t size{0U};
+            uint32_t start_index{0U};
+            string column;
+            string alias;
+
+            Field(string alias, string column, uint32_t size, uint32_t start_index, unsigned char dtype);
+        };
+
+        struct Meta
+        {
+            char utc_offset{0};
+
+            vector<Field> fields;
+
+            uint32_t itemsize();
         };
 
     } // namespace datalib

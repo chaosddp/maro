@@ -72,6 +72,7 @@ namespace maro
             _file.open(bin_file, ios::out | ios::binary);
 
             _header.file_type = FILE_TYPE_BIN;
+            _header.converter_version = CONVERTER_VERSION;
 
             write_header();
         }
@@ -102,24 +103,32 @@ namespace maro
         void BinaryWriter::add_csv(string csv_file)
         {
             CSV csv;
-            auto i = 0;
 
             if (csv.mmap(csv_file))
             {
                 const auto &header = csv.header();
 
+                // construct the column to field mapping for each csv file
                 construct_column_mapping(header);
+                
+                // max number of items in buffer
+                auto max_items_num = floorl(BUFFER_LENGTH / _header.item_size);
+
+                // current items in buffer
+                auto cur_items_num = 0;
+
+                auto colum_index = 0;
 
                 for (const auto row : csv)
                 {
-                    i = 0;
                     auto length = 0;
                     auto offset = 0;
+                    colum_index = 0;
 
                     for (const auto cell : row)
                     {
                         // cell.read_value()
-                        auto iter = _col2field_map.find(i);
+                        auto iter = _col2field_map.find(colum_index);
 
                         if (iter != _col2field_map.end())
                         {
@@ -207,15 +216,27 @@ namespace maro
                             }
                         }
 
-                        i++;
+                        colum_index++;
                     }
 
                     if (offset > 0)
                     {
+                        cur_items_num++;
                         _header.total_items++;
 
-                        _file.write(_buffer, offset);
+                        if(cur_items_num >= max_items_num)
+                        {
+                            _file.write(_buffer, cur_items_num * _header.item_size);
+
+                            cur_items_num = 0;
+                        }
+                        
                     }
+                }
+
+                if(cur_items_num !=0)
+                {
+                    _file.write(_buffer, cur_items_num * _header.item_size);
                 }
             }
         }
@@ -226,6 +247,9 @@ namespace maro
 
         void BinaryWriter::construct_column_mapping(const CSV::Row &header)
         {
+            // clear first
+            _col2field_map.clear();
+
             auto hi = 0;
 
             // try to match the headers with meta, and keep the index
@@ -301,6 +325,7 @@ namespace maro
 
                 WriteToBuffer(sizeof(uint32_t), field.start_index)
                 WriteToBuffer(sizeof(unsigned char), field.type) 
+                WriteToBuffer(sizeof(uint32_t), field.size)
 
                 auto alias_length = field.alias.size();
 

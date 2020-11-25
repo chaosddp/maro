@@ -24,12 +24,6 @@ namespace maro
 {
     namespace datalib
     {
-        const string MARO = "maro";
-        const unsigned char FILE_TYPE_BIN = 1;
-        const unsigned char FILE_TYPE_INDEX = 2;
-        const uint32_t CONVERTER_VERSION = 100;
-        
-        const int SECONDS_PER_HOUR = 60 * 60;
 
         class BinaryWriter
         {
@@ -57,7 +51,7 @@ namespace maro
 
             Meta _meta;
 
-            char _buffer[4096];
+            char _buffer[BUFFER_LENGTH];
 
             map<int, int> _col2field_map;
 
