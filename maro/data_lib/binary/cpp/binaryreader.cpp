@@ -6,6 +6,31 @@ namespace maro
 {
     namespace datalib
     {
+        BinaryReaderIterator::BinaryReaderIterator(BinaryReader *reader)
+        {
+            _reader = reader;
+        }
+
+        BinaryReaderIterator::~BinaryReaderIterator()
+        {
+            _reader = nullptr;
+        }
+
+        ItemContainer* BinaryReaderIterator::operator*()
+        {
+            return _reader->next_item();
+        }
+
+        BinaryReaderIterator& BinaryReaderIterator::operator++()
+        {
+            return *this;
+        }
+
+        bool BinaryReaderIterator::operator!=(const BinaryReaderIterator& bri)
+        {
+            return !_reader->_file.eof() || _reader->cur_item_index !=  -1;
+        }
+        
         BinaryReader::BinaryReader(string bin_file)
         {
             _file.open(bin_file, ios::binary | ios::in);
@@ -25,24 +50,11 @@ namespace maro
 
         ItemContainer *BinaryReader::next_item()
         {
-            if (cur_item_index < 0 || cur_item_index >= max_items_in_buffer)
+            fill_buffer();
+
+            if(cur_item_index < 0)
             {
-                if (_file.eof())
-                {
-                    return nullptr;
-                }
-
-                // read into buffer
-                _file.read(_buffer, max_items_in_buffer * _header.item_size);
-
-                max_items_in_buffer = min<long>(max_items_in_buffer, floorl(_file.gcount() / _header.item_size));
-
-                if (max_items_in_buffer == 0)
-                {
-                    return nullptr;
-                }
-
-                cur_item_index = 0;
+                return nullptr;
             }
 
             _item.set_offset(cur_item_index * _header.item_size);
@@ -55,6 +67,36 @@ namespace maro
         const Meta *BinaryReader::get_meta()
         {
             return &_meta;
+        }
+
+        BinaryReaderIterator BinaryReader::begin()
+        {
+            return BinaryReaderIterator(this);
+        }
+
+        BinaryReaderIterator BinaryReader::end()
+        {
+            return BinaryReaderIterator(this);
+        }
+
+        void BinaryReader::fill_buffer()
+        {
+            if (cur_item_index < 0 || cur_item_index >= max_items_in_buffer)
+            {
+                if (_file.eof())
+                {
+                    cur_item_index = -1;
+                }
+                else
+                {
+                    // read into buffer
+                    _file.read(_buffer, max_items_in_buffer * _header.item_size);
+
+                    max_items_in_buffer = min<long>(max_items_in_buffer, floorl(_file.gcount() / _header.item_size));
+
+                    cur_item_index = max_items_in_buffer == 0 ? -1 : 0;
+                }
+            }
         }
 
         void BinaryReader::read_header()

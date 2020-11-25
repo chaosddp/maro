@@ -309,8 +309,6 @@ namespace maro
                             if (_header.start_timestamp == 0ULL)
                             {
                                 _header.start_timestamp = rv;
-
-                                cout << rv << endl;
                             }
 
                             _header.end_timestamp = rv;
