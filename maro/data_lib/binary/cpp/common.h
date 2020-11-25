@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 #include <string>
+#include <ostream>
+
 
 using namespace std;
 
@@ -60,8 +62,7 @@ namespace maro
             ULONGLONG reserved3{0ULL};
             ULONGLONG reserved4{0ULL};
 
-            // write to buffer, and return size wrote
-            // size_t write(char *buffer);
+            friend ostream& operator<<(ostream& os, const BinHeader& header);
         };
 
         static unordered_map<string, pair<unsigned char, size_t>> field_dtype = {

@@ -100,11 +100,6 @@ namespace maro
             write_header();
         }
 
-#define WriteField(to_type_func, dtype)             \
-    auto rv = to_type_func(v);                      \
-    memcpy(&_buffer[offset], &rv, sizeof(dtype));   \
-    is_valid_row = true;                            
-
         void BinaryWriter::add_csv(string csv_file)
         {
             CSV csv;
@@ -249,6 +244,10 @@ namespace maro
             }
         }
 
+#define WriteField(to_type_func, dtype)             \
+    auto rv = to_type_func(v);                      \
+    memcpy(&_buffer[offset], &rv, sizeof(dtype));   \
+    is_valid_row = true;                            
 
         inline bool BinaryWriter::collect_item_to_buffer(CSV::Row row, int cur_items_num)
         {
@@ -310,6 +309,8 @@ namespace maro
                             if (_header.start_timestamp == 0ULL)
                             {
                                 _header.start_timestamp = rv;
+
+                                cout << rv << endl;
                             }
 
                             _header.end_timestamp = rv;
