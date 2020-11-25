@@ -16,21 +16,21 @@ namespace maro
             _reader = nullptr;
         }
 
-        ItemContainer* BinaryReaderIterator::operator*()
+        ItemContainer *BinaryReaderIterator::operator*()
         {
             return _reader->next_item();
         }
 
-        BinaryReaderIterator& BinaryReaderIterator::operator++()
+        BinaryReaderIterator &BinaryReaderIterator::operator++()
         {
             return *this;
         }
 
-        bool BinaryReaderIterator::operator!=(const BinaryReaderIterator& bri)
+        bool BinaryReaderIterator::operator!=(const BinaryReaderIterator &bri)
         {
-            return !_reader->_file.eof() || _reader->cur_item_index !=  -1;
+            return !_reader->_file.eof() || (_reader->cur_item_index >= 0 && _reader->cur_item_index < _reader->max_items_in_buffer);
         }
-        
+
         BinaryReader::BinaryReader(string bin_file)
         {
             _file.open(bin_file, ios::binary | ios::in);
@@ -54,7 +54,7 @@ namespace maro
         {
             fill_buffer();
 
-            if(cur_item_index < 0)
+            if (cur_item_index < 0)
             {
                 return nullptr;
             }
@@ -132,6 +132,8 @@ namespace maro
             {
                 throw ConvertVersionNotMatch();
             }
+
+            cout << _header << endl;
         }
 
         void BinaryReader::read_meta()
