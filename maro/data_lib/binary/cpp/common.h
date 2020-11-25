@@ -15,6 +15,7 @@ namespace maro
     {
         using UCHAR = unsigned char;
         using ULONGLONG = unsigned long long;
+        using LONGLONG = long long;
         using UINT = uint32_t;
 
         const string MARO = "maro";

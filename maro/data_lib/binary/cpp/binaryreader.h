@@ -16,7 +16,8 @@ namespace maro
     {
 
         class ConvertVersionNotMatch : public exception
-        {};
+        {
+        };
 
         class BinaryReader
         {
@@ -26,10 +27,11 @@ namespace maro
 
             ifstream _file;
 
-
-            char _buffer[4096];
+            char _buffer[BUFFER_LENGTH];
             ItemContainer _item;
 
+            long max_items_in_buffer{0};
+            int cur_item_index{-1};
 
             void read_header();
             void read_meta();
@@ -38,7 +40,9 @@ namespace maro
             BinaryReader(string bin_file);
             ~BinaryReader();
 
-            ItemContainer* next_item();
+            ItemContainer *next_item();
+
+            const Meta* get_meta();
         };
 
     } // namespace datalib

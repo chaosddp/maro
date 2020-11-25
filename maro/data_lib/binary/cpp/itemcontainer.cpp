@@ -27,7 +27,7 @@ namespace maro
         {
             int32_t r = 0;
 
-            memcpy(&r, &_buffer[offset], sizeof(int32_t));
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(int32_t));
 
             return r;
         }
@@ -37,7 +37,7 @@ namespace maro
         {
             float r = 0;
 
-            memcpy(&r, &_buffer[offset], sizeof(float));
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(float));
 
             return r;
         }
@@ -47,7 +47,7 @@ namespace maro
         {
             double r = 0;
 
-            memcpy(&r, &_buffer[offset], sizeof(double));
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(double));
 
             return r;
         }
@@ -57,7 +57,17 @@ namespace maro
         {
             short r = 0;
 
-            memcpy(&r, &_buffer[offset], sizeof(short));
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(short));
+
+            return r;
+        }
+
+        template <>
+        LONGLONG ItemContainer::get<LONGLONG>(int offset)
+        {
+            LONGLONG r = 0LL;
+
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(LONGLONG));
 
             return r;
         }
@@ -67,7 +77,7 @@ namespace maro
         {
             ULONGLONG r = 0ULL;
 
-            memcpy(&r, &_buffer[offset], sizeof(ULONGLONG));
+            memcpy(&r, &_buffer[ _offset + offset], sizeof(ULONGLONG));
 
             return r;
         }

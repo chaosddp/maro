@@ -12,6 +12,10 @@ namespace maro
 
             read_header();
             read_meta();
+
+            max_items_in_buffer = floorl(BUFFER_LENGTH/_header.item_size);
+
+            _item.set_buffer(_buffer);
         }
 
         BinaryReader::~BinaryReader()
@@ -21,7 +25,36 @@ namespace maro
 
         ItemContainer *BinaryReader::next_item()
         {
+            if(cur_item_index < 0 || cur_item_index >= max_items_in_buffer)
+            {
+                if(_file.eof())
+                {
+                    return nullptr;
+                }
+
+                // read into buffer
+                _file.read(_buffer, max_items_in_buffer * _header.item_size);
+
+                max_items_in_buffer = min<long>(max_items_in_buffer, floorl(_file.gcount() / _header.item_size));
+
+                if(max_items_in_buffer == 0)
+                {
+                    return nullptr;
+                }
+
+                cur_item_index = 0;
+            }
+
+            _item.set_offset(cur_item_index * _header.item_size);
+
+            cur_item_index++;
+
             return &_item;
+        }
+
+        const Meta* BinaryReader::get_meta()
+        {
+            return &_meta;
         }
 
         void BinaryReader::read_header()
