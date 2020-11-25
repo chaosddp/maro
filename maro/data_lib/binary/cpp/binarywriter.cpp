@@ -100,6 +100,11 @@ namespace maro
             write_header();
         }
 
+#define WriteField(to_type_func, dtype)             \
+    auto rv = to_type_func(v);                      \
+    memcpy(&_buffer[offset], &rv, sizeof(dtype));   \
+    is_valid_row = true;                            
+
         void BinaryWriter::add_csv(string csv_file)
         {
             CSV csv;
@@ -122,104 +127,10 @@ namespace maro
                 for (const auto row : csv)
                 {
                     auto length = 0;
-                    auto offset = 0;
-                    colum_index = 0;
+                    
+                    auto is_valid_row = collect_item_to_buffer(row, cur_items_num);
 
-                    for (const auto cell : row)
-                    {
-                        // cell.read_value()
-                        auto iter = _col2field_map.find(colum_index);
-
-                        if (iter != _col2field_map.end())
-                        {
-                            // we find the column
-                            string v;
-
-                            cell.read_value(v);
-
-                            auto &field = _meta.fields[iter->second];
-
-                            switch (field.type)
-                            {
-                            case 1:
-                            {
-                                // short
-                                auto rv = to_short(v);
-                                length = sizeof(short);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                break;
-                            }
-                            case 2:
-                            {
-                                // int
-                                auto rv = to_int(v);
-                                length = sizeof(int32_t);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                break;
-                            }
-                            case 3:
-                            { // long
-                                auto rv = to_long(v);
-                                length = sizeof(LONGLONG);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                break;
-                            }
-                            case 4:
-                            { // float
-                                auto rv = to_float(v);
-                                length = sizeof(float);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                break;
-                            }
-                            case 5:
-                            { // double
-                                auto rv = to_double(v);
-                                length = sizeof(double);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                break;
-                            }
-                            case 6:
-                            {
-                                // timestamp
-                                auto rv = to_timestamp(v, local_utc_offset, _meta.utc_offset);
-                                length = sizeof(ULONGLONG);
-                                memcpy(&_buffer[offset], &rv, length);
-                                offset += length;
-
-                                // update header
-                                if (field.alias == "timestamp")
-                                {
-                                    if (_header.start_timestamp == 0ULL)
-                                    {
-                                        _header.start_timestamp = rv;
-
-                                        cout << rv << endl;
-                                    }
-
-                                    _header.end_timestamp = rv;
-                                }
-
-                                break;
-                            }
-                            default:
-                                break;
-                            }
-                        }
-
-                        colum_index++;
-                    }
-
-                    if (offset > 0)
+                    if (is_valid_row)
                     {
                         cur_items_num++;
                         _header.total_items++;
@@ -336,6 +247,90 @@ namespace maro
 
                  _header.meta_size += offset;
             }
+        }
+
+
+        inline bool BinaryWriter::collect_item_to_buffer(CSV::Row row, int cur_items_num)
+        {
+            auto column_index = 0;
+
+            auto is_valid_row = false;
+
+            for (const auto cell : row)
+            {
+                auto iter = _col2field_map.find(column_index);
+
+                if (iter != _col2field_map.end())
+                {
+                    // we find the column
+                    string v;
+
+                    cell.read_value(v);
+
+                    auto &field = _meta.fields[iter->second];
+                    auto offset = cur_items_num * _header.item_size + field.start_index;
+
+                    switch (field.type)
+                    {
+                    case 1:
+                    {
+                        WriteField(to_short, short)
+
+                        break;
+                    }
+                    case 2:
+                    {
+                        WriteField(to_int, int32_t)
+                        break;
+                    }
+                    case 3:
+                    {
+                        WriteField(to_long, LONGLONG)
+
+                        break;
+                    }
+                    case 4:
+                    {  
+                        WriteField(to_float, float)
+
+                        break;
+                    }
+                    case 5:
+                    {  
+                        WriteField(to_double, double)
+                        break;
+                    }
+                    case 6:
+                    {
+                        WriteField(convert_to_timestamp, sizeof(ULONGLONG))
+
+                        // update header
+                        if (field.alias == "timestamp")
+                        {
+                            if (_header.start_timestamp == 0ULL)
+                            {
+                                _header.start_timestamp = rv;
+                            }
+
+                            _header.end_timestamp = rv;
+                        }
+
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                }
+
+                column_index++;
+            }
+
+            return is_valid_row;
+        }
+
+        inline ULONGLONG BinaryWriter::convert_to_timestamp(string &val_str)
+        {
+            return to_timestamp(val_str, local_utc_offset, _meta.utc_offset);
         }
 
     } // namespace datalib

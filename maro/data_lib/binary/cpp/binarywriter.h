@@ -59,6 +59,10 @@ namespace maro
             void write_header();
 
             void write_meta();
+
+            inline ULONGLONG convert_to_timestamp(string &val_str);
+
+            inline bool BinaryWriter::collect_item_to_buffer(CSV::Row row, int cur_items_num);
             
         };
     } // namespace datalib
