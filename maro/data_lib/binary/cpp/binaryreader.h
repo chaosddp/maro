@@ -38,6 +38,9 @@ namespace maro
             long max_items_in_buffer{0};
             int cur_item_index{-1};
 
+            // offset of data part
+            streampos _data_offset{0};
+
             // used to save the offset in file that user have filtered
             unordered_map<streamoff, streamoff> _filter_map;
 
@@ -57,23 +60,25 @@ namespace maro
             BinaryReaderIterator begin();
 
             BinaryReaderIterator end();
+
+            void reset();
         };
 
         class BinaryReaderIterator
         {
-            BinaryReader* _reader;
+            BinaryReader *_reader;
 
-            public:
-                BinaryReaderIterator(BinaryReader *_reader);
-                ~BinaryReaderIterator();
+        public:
+            BinaryReaderIterator(BinaryReader *_reader);
+            ~BinaryReaderIterator();
 
-                // move to next
-                BinaryReaderIterator& operator++();
+            // move to next
+            BinaryReaderIterator &operator++();
 
-                // get current item
-                ItemContainer* operator*();
+            // get current item
+            ItemContainer *operator*();
 
-                bool operator!=(const BinaryReaderIterator& bri);
+            bool operator!=(const BinaryReaderIterator &bri);
         };
 
     } // namespace datalib

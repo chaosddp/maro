@@ -38,6 +38,8 @@ namespace maro
             read_header();
             read_meta();
 
+            _data_offset = _file.tellg();
+
             max_items_in_buffer = floorl(BUFFER_LENGTH / _header.item_size);
 
             _item.set_buffer(_buffer);
@@ -77,6 +79,15 @@ namespace maro
         BinaryReaderIterator BinaryReader::end()
         {
             return BinaryReaderIterator(this);
+        }
+
+        void BinaryReader::reset()
+        {
+            _file.seekg(_data_offset);
+
+            cur_item_index = -1;
+
+            max_items_in_buffer = floorl(BUFFER_LENGTH / _header.item_size);
         }
 
         void BinaryReader::fill_buffer()
