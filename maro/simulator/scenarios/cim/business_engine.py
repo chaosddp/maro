@@ -13,6 +13,8 @@ from maro.event_buffer import AtomEvent, CascadeEvent, EventBuffer, MaroEvents
 from maro.simulator.scenarios import AbsBusinessEngine
 from maro.simulator.scenarios.helpers import DocableDict
 from maro.simulator.scenarios.matrix_accessor import MatrixAttributeAccessor
+from maro.utils.streamable import stream
+
 
 from .common import Action, ActionScope, DecisionEvent
 from .event_payload import EmptyReturnPayload, LadenReturnPayload, VesselDischargePayload, VesselStatePayload
@@ -82,6 +84,9 @@ class CimBusinessEngine(AbsBusinessEngine):
 
         # As we already unpack the route to the max tick, we can insert all departure events at the beginning.
         self._load_departure_events()
+
+        stream.category("port_detail", "index", "empty", "full", "capacity", "shortage", "booking", "fulfillment")
+        stream.category("vessel_detail", "index", "empty", "full", "capacity", "remaining_space")
 
     @property
     def configs(self):
@@ -203,6 +208,12 @@ class CimBusinessEngine(AbsBusinessEngine):
                 port.booking = 0
                 port.fulfillment = 0
                 port.transfer_cost = 0
+
+        for port in self._ports:
+            stream.csv("port_detail", port.index, port.empty, port.full, port.capacity, port.shortage, port.booking, port.fulfillment)
+
+        for vessel in self._vessels:
+            stream.csv("vessel_detail", vessel.index, vessel.empty, vessel.full, vessel.capacity, vessel.remaining_space)
 
         return tick + 1 == self._max_tick
 
@@ -412,6 +423,7 @@ class CimBusinessEngine(AbsBusinessEngine):
 
         execute_qty = order.quantity
         src_empty = src_port.empty
+
         src_port.booking += execute_qty
         src_port.acc_booking += execute_qty
 

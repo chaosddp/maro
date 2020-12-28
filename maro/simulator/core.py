@@ -10,6 +10,7 @@ from maro.backends.frame import FrameBase, SnapshotList
 from maro.data_lib.dump_csv_converter import DumpConverter
 from maro.event_buffer import EventBuffer, EventState
 from maro.utils.exception.simulator_exception import BusinessEngineNotFoundError
+from maro.utils.streamable import stream
 
 from .abs_core import AbsEnv, DecisionMode
 from .scenarios.abs_business_engine import AbsBusinessEngine
@@ -245,6 +246,7 @@ class Env(AbsEnv):
         while True:
             # Ask business engine to do thing for this tick, such as generating and pushing events.
             # We do not push events now.
+            stream.tick(self._tick)
             self._business_engine.step(self._tick)
 
             while True:

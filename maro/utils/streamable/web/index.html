@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Streamable test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  </head>
+  <body>
+    <label>Experiments:
+        <div class="select"><select id="expmts" ></select></div>
+    </label>
+    
+    <label>Episode:
+        <div class="select"><select id="episodes"></select></div>
+    </label>
+    
+            <script>
+                var ws = new WebSocket("ws://127.0.0.1:8889/");
+                var cat_data = {};
+    
+                ws.onmessage = function (event) {
+                    data = JSON.parse(event.data);
+                    switch (data.type) {
+                        case "new_expmt":
+                            var expmts = document.getElementById("expmts");
+                            var e_ele = document.createElement("option");
+                            e_ele.innerText = data.data;
+                            expmts.appendChild(e_ele);
+    
+                            break;
+                        case "new_eps":
+                            var episodes = document.getElementById("episodes");
+                            var e_ele = document.createElement("option");
+                            e_ele.innerText = data.data[1];
+    
+                            episodes.appendChild(e_ele);
+    
+                            break;
+                        case "new_cat":
+                            console.log(data)
+                            cat_data[data.cat] = data.data;
+                            break;
+                        case "row":
+                            var id = data.cat + " - " + data.ep;
+                            var cat_root = document.getElementById(id);
+    
+                            if(cat_root == null)
+                            {
+                                cat_root = document.createElement("table");
+                                cat_root.id = id;
+                                cat_root.className="table is-bordered is-fullwidth"
+    
+                                document.body.appendChild(cat_root);
+    
+                                // header
+                                var header = document.createElement("tr");
+                                var h = document.createElement("th");
+                                h.innerText = "tick";
+    
+                                header.appendChild(h);
+    
+                                for(var i=0; i<cat_data[data.cat].length;i++)
+                                {
+                                    var h = document.createElement("th");
+                                    h.innerText = cat_data[data.cat][i]
+    
+                                    header.appendChild(h);
+                                }
+    
+                                cat_root.appendChild(header);
+                            }
+    
+                            var row = document.createElement("tr");
+    
+                            var h = document.createElement("td");
+                            h.innerText = data.tick;
+                            row.appendChild(h);
+    
+                            for(var i=0; i<data.data.length; i++)
+                            {
+                                var col = document.createElement("td");
+                                col.innerText = data.data[i];
+    
+                                row.appendChild(col);
+                            }
+    
+                            cat_root.appendChild(row);
+    
+                            break;
+                        default:
+                            console.log(data)
+                            break;
+                    }
+                };
+    
+            </script>
+  </body>
+</html>
