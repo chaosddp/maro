@@ -22,6 +22,7 @@ class DataStream:
         self._experiment_name = "Default experiment"
         self._episode = 0
         self._tick = 0
+        self._sender = None
 
     def start(self, experiment_name: str):
         self._sender = DataSender(self._address, self._port, self._data_queue, self._cmd_queue)
@@ -54,9 +55,13 @@ class DataStream:
         self._data_queue.put_nowait(data)
 
     def stop(self):
-        self._cmd_queue.put("close")
+        if self._sender and self._sender.is_alive():
+            self._cmd_queue.put("close")
 
-        self._sender.join()
+            self._sender.join()
+
+    def __del__(self):
+        self.stop()
 
 # The only interface to send data for whole program
 

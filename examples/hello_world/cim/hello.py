@@ -33,8 +33,6 @@ if __name__ == "__main__":
 
 
     # Query environment summary, which includes business instances, intra-instance attributes, etc.
-    print(env.summary)
-
     for ep in range(2):
         stream.episode(ep)
 

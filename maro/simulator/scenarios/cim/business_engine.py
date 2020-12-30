@@ -202,18 +202,18 @@ class CimBusinessEngine(AbsBusinessEngine):
             # Before go to next tick, we will take a snapshot first.
             self._frame.take_snapshot(self.frame_index(tick))
 
+        for port in self._ports:
+            stream.csv("port_detail", port.index, port.empty, port.full, port.capacity, port.shortage, port.booking, port.fulfillment)
+
+        for vessel in self._vessels:
+            stream.csv("vessel_detail", vessel.index, vessel.empty, vessel.full, vessel.capacity, vessel.remaining_space)
+
             # Reset port statistics (by tick) fields.
             for port in self._ports:
                 port.shortage = 0
                 port.booking = 0
                 port.fulfillment = 0
                 port.transfer_cost = 0
-
-        for port in self._ports:
-            stream.csv("port_detail", port.index, port.empty, port.full, port.capacity, port.shortage, port.booking, port.fulfillment)
-
-        for vessel in self._vessels:
-            stream.csv("vessel_detail", vessel.index, vessel.empty, vessel.full, vessel.capacity, vessel.remaining_space)
 
         return tick + 1 == self._max_tick
 
