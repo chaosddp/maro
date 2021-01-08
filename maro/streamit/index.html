@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Demo</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.min.css">
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        div.output {
+            overflow: auto;
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h3>Step 1: Connect to data service.</h3>
+        <label>Port to connect: </label>
+        <input id="service_port" type="number" value="8890" />
+        <button type="button" id="conn_btn">Connect</button>
+    </div>
+
+    <div>
+        <h3>Step 2: Click to set to live mode.</h3>
+
+        <select multiple="true" id="categories">
+            <option value="port_detail" title="port_detail">port_detail</option>
+            <option value="vessel_detail" title="vessel_detail">vessel_detail</option>
+        </select>
+
+        <button type="button" id="live_btn">Live mode</button>
+    </div>
+
+    <div>
+        <h3>Step 3: Click to cancel data recieving.</h3>
+
+        <button type="button" id="cancel_btn">Cancel</button>
+    </div>
+
+
+    <h3>Output:</h3>
+    <button type="button" id="clear_btn">Clear</button>
+
+    <div id="output"></div>
+    <script type="text/javascript">
+        // menubar
+        // var main_menu = new nw.Menu({ type: 'menubar' });
+
+        // connect menu
+        // var connect_menu = new nw.Menu();
+        // connect_menu.append(new nw.MenuItem({ label: 'Connect' }));
+        // connect_menu.append(new nw.MenuItem({ label: 'Close' }));
+
+        // main_menu.append(new nw.MenuItem({
+        //     label: 'Connection',
+        //     submenu: connect_menu
+        // }));
+
+        // nw.Window.get().menu = main_menu;
+
+        var websocket;
+
+        var output = $("#output");
+
+        function write_to_output(content) {
+            output.append($("<p>" + content + "</p>"));
+        }
+
+        $("#conn_btn").click(function () {
+            if(websocket)
+            {
+                websocket.close()
+
+                websocket = null;
+            }
+
+            var service_port = $("#service_port").val()
+
+            write_to_output("trying to connec to " + service_port);
+
+            try {
+                websocket = new WebSocket("ws://127.0.0.1:" + service_port);
+
+                write_to_output("Success");
+                write_to_output(websocket.readyState);
+
+                websocket.onmessage = function (event) {
+                    //data = JSON.parse(event.data);
+
+                    write_to_output(event.data)
+                };
+
+            }
+            catch (error) {
+                write_to_output(error);
+            }
+        });
+
+        $("#live_btn").click(function () {
+            //write_to_output($("#categories").val());
+            var categoires = $("#categories").val();
+
+            websocket.send(JSON.stringify({ "type": "set_live_source", "categories": categoires}));
+
+            write_to_output("Ready to recieve port " + categoires);
+        });
+
+        $("#cancel_btn").click(function(){
+            websocket.send(JSON.stringify({"type": "cancel"}));
+
+            write_to_output("Canceling...");
+        });
+
+        $("#clear_btn").click(function(){
+            $("#output").text("")
+        })
+        
+
+    </script>
+</body>
+
+</html>
