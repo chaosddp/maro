@@ -31,7 +31,14 @@
         <select multiple="true" id="categories">
             <option value="port_detail" title="port_detail">port_detail</option>
             <option value="vessel_detail" title="vessel_detail">vessel_detail</option>
+            <option value="config" title="config">config</option>
         </select>
+
+        <label>Episode to retrieve: </label>
+        <input id="episode" value="0" type="number" />
+
+        <label>Delay to recieve data: </label>
+        <input id="delay" placeholder="delay in seconds" inputmode="numeric" value="1" type="number">
 
         <button type="button" id="live_btn">Live mode</button>
     </div>
@@ -40,6 +47,15 @@
         <h3>Step 3: Click to cancel data recieving.</h3>
 
         <button type="button" id="cancel_btn">Cancel</button>
+    </div>
+
+
+    <div>
+        <h3>Step 4: offline source</h3>
+
+        <input type="text" id="expmt_name" value="test_expmt_1610241113.0317953" />
+
+        <button type="button" id="offline_source_btn">Offline source</button>
     </div>
 
 
@@ -72,8 +88,7 @@
         }
 
         $("#conn_btn").click(function () {
-            if(websocket)
-            {
+            if (websocket) {
                 websocket.close()
 
                 websocket = null;
@@ -92,7 +107,9 @@
                 websocket.onmessage = function (event) {
                     //data = JSON.parse(event.data);
 
-                    write_to_output(event.data)
+                    write_to_output(event.data);
+
+                    console.log(JSON.parse(event.data));
                 };
 
             }
@@ -104,22 +121,44 @@
         $("#live_btn").click(function () {
             //write_to_output($("#categories").val());
             var categoires = $("#categories").val();
+            var episode = parseInt($("#episode").val());
+            var delay = parseFloat($("#delay").val());
 
-            websocket.send(JSON.stringify({ "type": "set_live_source", "categories": categoires}));
+            websocket.send(JSON.stringify({
+                "type": "set_live_source",
+                "categories": categoires,
+                "episodes": [episode],
+                "delay": delay
+            }));
 
             write_to_output("Ready to recieve port " + categoires);
         });
 
-        $("#cancel_btn").click(function(){
-            websocket.send(JSON.stringify({"type": "cancel"}));
+        $("#offline_source_btn").click(function () {
+            var categoires = $("#categories").val();
+            var episode = parseInt($("#episode").val());
+            var delay = parseFloat($("#delay").val());
+            var experiemnt = $("#expmt_name").val();
+
+            websocket.send(JSON.stringify({
+                "type": "set_offline_source",
+                "experiment": experiemnt,
+                "categories": categoires,
+                "episodes": [episode],
+                "delay": delay
+            }));
+        });
+
+        $("#cancel_btn").click(function () {
+            websocket.send(JSON.stringify({ "type": "cancel" }));
 
             write_to_output("Canceling...");
         });
 
-        $("#clear_btn").click(function(){
+        $("#clear_btn").click(function () {
             $("#output").text("")
         })
-        
+
 
     </script>
 </body>

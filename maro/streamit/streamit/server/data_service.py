@@ -1,4 +1,5 @@
 
+import os
 import json
 import asyncio
 import websockets
@@ -44,7 +45,8 @@ class DataService:
         # Start listening
         loop = asyncio.get_event_loop()
 
-        wsock_server = websockets.serve(self._on_client_connected, address, port)
+        wsock_server = websockets.serve(
+            self._on_client_connected, address, port)
         loop.run_until_complete(wsock_server)
 
         # Start task to collect online data.
@@ -82,11 +84,16 @@ class DataService:
                     "data": ret_data
                 })
             elif msg_type == MessageType.Category:
+                category = self._online_manager.live_experiment.get_category(
+                    ret_data)
+
                 await self._send_msg_to_all({
                     "type": "live_category",
                     "data": {
                         "name": ret_data,
-                        "headers": self._online_manager.live_experiment.get_category(ret_data)
+                        "type": category.data_type,
+                        "is_time_depend": category.is_time_depend,
+                        "headers": category.headers,
                     }
                 })
 
@@ -101,8 +108,8 @@ class DataService:
                 cmd = await wsock.recv()
 
                 self._process_cmd(cmd, wsock)
-        except:
-            pass
+        except Exception as ex:
+            print(ex)
         finally:
             await wsock.close()
 
@@ -127,18 +134,22 @@ class DataService:
             # online mode
             # {
             #  "type": "set_live_source"
-            #  "categories": ["caategory 1", "category 2"]
+            #  "categories": ["category 1", "category 2"]
+            #  "episodes": [0, 99]
             # }
-            self._online_manager.request(wsock, cmd["categories"])
+            self._online_manager.request(
+                wsock, cmd["categories"], cmd["episodes"], cmd.get("delay", 0))
         elif cmd_type == "set_offline_source":
             # offline mode
             # {
             #  "type": "set_offline_source"
             #  "experiment": "experiment name"
             #  "categories": ["", ""]
+            #  "episodes": [0, 99]
             # }
+            print(cmd)
             self._offline_manager.request(
-                wsock, cmd["experiment"], cmd["categories"])
+                wsock, cmd["experiment"], cmd["categories"], cmd["episodes"], cmd.get("delay", 0))
         elif cmd_type == "cancel":
             # cancel recieving data of current connection
             self._experiment_manager.cancel(wsock)

@@ -3,10 +3,13 @@
 Used to hold data of an experiment.
 
 """
+from ..common import DataType, DATA_DIR
 import os
 import asyncio
 import websockets
 import aiofiles
+
+import simplejson as json
 
 from typing import List
 
@@ -25,16 +28,6 @@ at the end of tick.
 
 """
 
-import os
-import aiofiles
-from ..common import DataType
-
-# TODO: override with argv
-DATA_DIR = "./data"
-
-if not os.path.exists(DATA_DIR):
-    os.mkdir(DATA_DIR)
-
 
 class CategoryState:
     file_handler = None
@@ -42,7 +35,8 @@ class CategoryState:
     is_data_write = False
     data_type = DataType.csv
     is_time_depend = True
-    cache = []
+    cache = None
+    headers = None
 
 
 class Experiment:
@@ -64,10 +58,6 @@ class Experiment:
 
         self._is_enable_dump = enable_dump
 
-        # File handlers for each category
-        # category name -> state
-        self._category_write_state = {}
-
     def setup(self):
         """Called after BeginExperiment message"""
         if self._is_enable_dump:
@@ -87,62 +77,85 @@ class Experiment:
         self._dispatchers.append(dispatcher)
 
     async def add_category(self, name: str, headers: List[str] = None, is_time_depend=True, data_type=DataType.csv):
+        state = CategoryState()
+        state.is_time_depend = is_time_depend
+        state.data_type = data_type
+        state.headers = headers
+
         """Add category and its header of current experiment"""
         if self._is_enable_dump and name not in self._categories:
-            category_file = os.path.join(DATA_DIR, self.name, f"{name}.txt")
+            ext = ".txt"
+
+            if data_type == DataType.csv:
+                ext = ".csv"
+            elif data_type == DataType.json:
+                ext = ".json"
+            elif data_type == DataType.binary:
+                ext = ".bin"
+
+            category_file = os.path.join(DATA_DIR, self.name, f"{name}{ext}")
             category_fp = await aiofiles.open(category_file, mode="w+", newline="\n")
 
-            state = CategoryState()
             state.file_handler = category_fp
-            state.is_time_depend = is_time_depend
-            state.data_type = data_type
+
+            state.cache = []
 
             # Write headers if no data writed
-            if headers and not state.is_header_write and not state.is_data_write:
+            if data_type == DataType.csv and headers and not state.is_header_write and not state.is_data_write:
                 if state.is_time_depend:
                     await category_fp.write(f"episode,tick,")
                 await category_fp.write(",".join(headers))
                 await category_fp.write("\n")
 
-            self._category_write_state[name] = state
+        self._categories[name] = state
 
-        self._categories[name] = headers
+        return state
 
     def get_category(self, name: str) -> List[str]:
         """Get category header by name."""
-        return self._categories.get(name)
+        return self._categories.get(name, None)
 
     def get_category_names(self) -> List[str]:
         return [c for c in self._categories.keys()]
 
-    async def put(self, data: object):
+    async def put(self, data: object, need_dump=True):
         """Put data into current experiment for dispatch."""
+
         if self._is_enable_dump:
-            epsiode, tick, data_list = data
+            episode, tick, data_list = data
 
             for category_data in data_list:
                 category = category_data[0].decode()
-
-                if category not in self._category_write_state:
-                    self.add_category(category)
-
-                state = self._category_write_state.get(category, None)
+                state = self._categories.get(category, None)
 
                 if state is not None:
+                    data_to_dump = None
+
                     # For csv
                     if state.data_type == DataType.csv:
                         data_to_dump = []
                         if state.is_time_depend:
                             # await state.file_handler.write(f"{epsiode},{tick},")
-                            data_to_dump.extend((epsiode, tick))
+                            data_to_dump.extend((episode, tick))
                         data_to_dump.extend(category_data[1:])
 
-                        state.cache.append(",".join([str(item) for item in data_to_dump]))
-                        state.cache.append("\r")
+                        state.cache.append(
+                            ",".join([str(item) for item in data_to_dump]))
+                        state.cache.append("\n")
+                    elif state.data_type == DataType.json:
+                        data_to_dump = category_data[1].decode()
 
-                        if len(state.cache) > 100:
-                            await state.file_handler.writelines(state.cache)
-                            state.cache.clear()
+                        if state.is_time_depend:
+                            data_to_dump = f"{{\"episode\":{episode},\"tick\":{tick}, \"data\":{data_to_dump}}}"
+
+                        state.cache.append(data_to_dump)
+                        state.cache.append("\n")
+
+                    if len(state.cache) > 100:
+                        await state.file_handler.writelines(state.cache)
+                        state.cache.clear()
+
+                state = None
 
         await self._send_data(data)
 
@@ -159,20 +172,36 @@ class Experiment:
         # Tell experiment buffer remove self
         self._experiment_manager.remove(self)
 
-        for category, state in self._category_write_state.items():
+        for category, state in self._categories.items():
             print("Closing file for category:", category)
 
             if len(state.cache) > 0:
                 await state.file_handler.writelines(state.cache)
+                await state.file_handler.flush()
                 await state.file_handler.close()
                 state.cache.clear()
 
-        self._category_write_state.clear()
+        await self._write_meta()
+
+        self._categories.clear()
 
         # TODO: call post-process scripts that process data of current experiment.
 
-    async def _send_data(self, data):
+    async def _send_data(self, data, need_dump=True):
         """Send data to dispatchers"""
         if data:
             for dispatcher in self._dispatchers:
-                await dispatcher.send(data)
+                await dispatcher.send(data, need_dump)
+
+    async def _write_meta(self):
+        async with aiofiles.open(os.path.join(DATA_DIR, self.name, "meta.json"), mode="w+") as fp:
+            await fp.write(json.dumps({
+                "name": self.name,
+                "scenario": self.scenario,
+                "topology": self.topology,
+                "durations": self.durations,
+                "total_episodes": self.total_episodes,
+                "categories": {
+                    name: {"data_type": c.data_type, "headers": c.headers, "is_time_depend": c.is_time_depend} for name, c in self._categories.items()
+                }
+            }))

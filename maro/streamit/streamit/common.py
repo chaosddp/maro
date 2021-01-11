@@ -1,8 +1,17 @@
 
+
+import os
 import struct
 
 from enum import IntEnum
 from msgpack import packb, unpackb
+
+
+# TODO: override with argv
+DATA_DIR = "./data"
+
+if not os.path.exists(DATA_DIR):
+    os.mkdir(DATA_DIR)
 
 
 class MessageType(IntEnum):

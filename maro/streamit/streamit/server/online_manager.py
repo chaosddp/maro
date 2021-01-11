@@ -20,9 +20,9 @@ class OnlineManager:
     def live_experiment(self):
         return self._current_experiment
 
-    def request(self, wsock: websockets.WebSocketServerProtocol, categories: List[str]):
+    def request(self, wsock: websockets.WebSocketServerProtocol, categories: List[str], episodes: List[int], delay=0):
         """Client request for a online experiment data"""
-        dispatcher = DataDispatcher(wsock, categories)
+        dispatcher = DataDispatcher(wsock, categories, episodes, delay)
 
         self._current_experiment.add_dispatcher(dispatcher)
 

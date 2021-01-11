@@ -19,7 +19,10 @@ if __name__ == "__main__":
 
     with stream.experiment(f"test_expmt_{time.time()}", "cim", "toy.1.1", total_eps, durations):
         stream.category("port_detail", True, DataType.csv, "index", "empty", "full", "shortage")
-        stream.category("vessel_detail", True, DataType.csv, "index", "empty", "full", "remaining_space")
+        stream.category("vessel_detail", True, DataType.json)
+        stream.category("config", False, DataType.json)
+        
+        stream.json("config", {"hehe": 12, "haha": [12, 3, 4]})
 
         for ep in range(total_eps):
             print(ep)
@@ -33,9 +36,14 @@ if __name__ == "__main__":
 
                         # vessels
                         for i in range(10):
-                            stream.csv("vessel_detail", i, i * 20, i * 200, i * 2000)
+                            stream.json("vessel_detail", {
+                                "index": i,
+                                "empty": i * 20,
+                                "full" : i * 200,
+                                "remaining_space": i * 2000
+                            })
 
-                time.sleep(1)
+                # time.sleep(1)
 
     stream.close()
 

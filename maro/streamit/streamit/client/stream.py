@@ -70,16 +70,21 @@ class ExperimentDataStream:
         if is_time_depend:
             self._cache.append((category, *args))
         else:
-            self._send(MessageType.Data, (category, *args))
+            self._send(MessageType.Data, (self._cur_episode, tick, category, *args))
 
     def json(self, category: str, jobj: Union[str, object]):
         """Send a object or a json string"""
         is_time_depend = self._category_info.get(category, True)
 
+        json_str = jobj
+
+        if type(jobj) is not str:
+            json_str = json.dumps(jobj)
+
         if is_time_depend:
-            self._cache.append((category, (*args)))
+            self._cache.append((category, json_str))
         else:
-            self._send(MessageType.Data, (category, jobj))
+            self._send(MessageType.Data, (self._cur_episode, self._cur_tick, [(category, json_str),]))
 
     def start(self, address="127.0.0.1", port=8889):
         """Connect to server, prepare to send data"""
