@@ -74,6 +74,15 @@ def node(name: str):
     return node_dec
 
 
+def try_get_attribute(target, name, default=None):
+    try:
+        attr = object.__getattribute__(target, name)
+
+        return attr
+    except:
+        return default
+
+
 cdef class NodeAttribute:
     def __cinit__(self, object dtype = None, SLOT_INDEX slot_num = 1, is_const = False, is_list = False):
         # Check the type of dtype, used to compact with old version
@@ -386,7 +395,9 @@ cdef class NodeBase:
         cdef str cb_name
         cdef _NodeAttributeAccessor attr_acc
 
-        for name, attr in type(self).__dict__.items():
+        for name in dir(type(self)):
+            attr = getattr(self, name)
+
             # Append an attribute access wrapper to current instance.
             if isinstance(attr, NodeAttribute):
                 # Register attribute.
@@ -633,7 +644,9 @@ cdef class FrameBase:
         cdef NODE_INDEX i
 
         # Register node and attribute in backend.
-        for frame_attr_name, frame_attr in type(self).__dict__.items():
+        for frame_attr_name in dir(type(self)):
+            frame_attr = getattr(self, frame_attr_name)
+
             # We only care about FrameNode instance.
             if isinstance(frame_attr, FrameNode):
                 node_cls = frame_attr._node_cls
@@ -656,8 +669,10 @@ cdef class FrameBase:
                 attr_name_type_dict = {}
 
                 # Register attributes.
-                for node_attr_name, node_attr in node_cls.__dict__.items():
-                    if isinstance(node_attr, NodeAttribute):
+                for node_attr_name in dir(node_cls):
+                    node_attr = getattr(node_cls, node_attr_name)
+
+                    if node_attr and isinstance(node_attr, NodeAttribute):
                         attr_type = self._backend.add_attr(node_type, node_attr_name, node_attr._dtype, node_attr._slot_number, node_attr._is_const, node_attr._is_list)
 
                         attr_name_type_dict[node_attr_name] = attr_type
