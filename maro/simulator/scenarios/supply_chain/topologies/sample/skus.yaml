@@ -1,0 +1,10 @@
+
+
+SKU1:
+  price: 100
+  cost: 100
+  service_level: 0.95
+  vlt: 5
+  penalty: 1000
+  init_stock: 1000
+  production_rate: 200

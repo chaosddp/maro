@@ -1,0 +1,131 @@
+
+# This file define the composition of entities
+
+StorageUnit:
+  data_model:
+    class: "StorageDataModel"
+    configs: "xxx"
+  logic:
+    class: "StorageLogic"
+    configs: "xxx"
+
+TransportUnit:
+  data_model:
+    class: "TransportDataModel"
+  logic:
+    class: "TransportLogic"
+
+DistributionUnit:
+  data_model:
+    class: "DistributionDataModel"
+  logic:
+    class: "DistributionLogic"
+
+
+ManufacturingUnit:
+  data_model:
+    class: "ManufacturingDataModel"
+  logic:
+    class: "ManufacturingLogic"
+
+ConsumerUnit:
+  data_model:
+    class: "ConsumerDataModel"
+  logic:
+    class: "ConsumerLogic"
+
+ProductUnit:
+  data_model:
+    class: "ProductDataModel"
+  logic:
+    class: "ProductLogic"
+
+SellerUnit:
+  data_model:
+    class: "SellerDataModel"
+  logic:
+    class: "SellerLogic"
+
+
+# NOTE:
+# different will original code, we will not keep the reference of parent facility's storage and distribution
+# we can find them in code from parent
+
+SKUSupplierUnit:
+  children:
+    manufacturing:
+      class: "ManufacturingUnit"
+    consumer:
+      class: "ConsumerUnit"
+    product:
+      class: "ProductUnit"
+
+SKUWarehouseUnit:
+  children:
+    product:
+      class: "ProductUnit"
+    consumer:
+      class: "ConsumerUnit"
+
+SKUStoreUnit:
+  children:
+    product:
+      class: "ProductUnit"
+    consumer:
+      class: "ConsumerUnit"
+    seller:
+      class: "SellerUnit"
+
+
+SupplierFacility:
+  children:
+    storage:
+      class: "StorageUnit"
+    distribution:
+      class: "DistributionUnit"
+    transports:
+      class: "TransportUnit"
+      type: "list" # this means this is list of transport, can be override later, this is the default value
+    suppliers:
+      class: "SKUSupplierUnit"
+      type: "dict" # means this field is a dict, user should provide the name and configuration for each one
+      # like
+      # suppliers:
+      #   sku1:
+      #     product:
+      #       data_model:
+      #          price: 100
+      #          cost: 100
+      #   sku2:
+      #     product:
+      #       data_model:
+      #         price: 100
+      #     
+  # Location means this will place into the virtual map, default is none
+  location:
+    x: 0
+    y: 0
+
+WarehouseFacility:
+  children:
+    storage:
+      class: "StorageUnit"
+    distribution:
+      class: "DistributionUnit"
+    transports:
+      class: "TransportUnit"
+      type: "list"
+    warehouses:
+      class: "SKUWarehouseUnit"
+      type: "dict"
+  location:
+    x: 0
+    y: 0
+
+RetailerFacility:
+  children:
+    storage:
+      class: "StorageUnit"
+  location:
+    x: 0
+    y: 0

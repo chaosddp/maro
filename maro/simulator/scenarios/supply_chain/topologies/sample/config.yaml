@@ -1,0 +1,90 @@
+
+# we use these files to de-couple the core part and entity definitions
+# make it possible to support different groups with same core
+core_definition: "core.yaml"
+entity_definition: "entities.yaml"
+sku_definition: "skus.yml"
+
+# NOTE:
+# definitions follow original configuration: inventory_config_tree.py
+world:
+  entities:
+    SUPPLIER1:
+      class: "SupplierFacility"
+      configs:
+        storage:
+          capatity: 3000
+        distribution:
+          order_cost: 200
+        transports: # this means there are to transport unit2
+          - capacity: 200
+          - capacity: 200
+        suppliers:
+          sku1:
+            product: # configuration of SKUSupplierUnit.product
+              data_model: # configuration of SKUSupplierUnit.product.datamodel
+                cost: 100
+                vlt: 5
+                penalty: 1000
+                init_stock: 1000
+                production_rate: 200
+          sku2:
+            product:
+              data_model:
+                price: 200
+                cost: 100
+                service_level: 0.90
+                vlt: 7
+                penalty: 1000
+                init_stock: 1000
+                production_rate: 200
+          sku3:
+            product:
+              data_model:
+                price: 300
+                cost: 150
+                service_level: 0.90
+                vlt: 5
+                penalty: 1000
+                init_stock: 1000
+                production_rate: 200
+    SUPPLIER2:
+          class: "SupplierFacility"
+          configs:
+            storage:
+              capatity: 3000
+            distribution:
+              order_cost: 200
+            suppliers:
+              sku1:
+                product: # configuration of SKUSupplierUnit.product
+                  data_model: # configuration of SKUSupplierUnit.product.datamodel
+                    price: 100
+                    cost: 100
+                    service_level: 0.95
+                    vlt: 5
+                    penalty: 1000
+                    init_stock: 1000
+                    production_rate: 200
+              sku2:
+                product:
+                  data_model:
+                    price: 200
+                    cost: 100
+                    service_level: 0.90
+                    vlt: 7
+                    penalty: 1000
+                    init_stock: 1000
+                    production_rate: 200
+              sku3:
+                product:
+                  data_model:
+                    price: 300
+                    cost: 150
+                    service_level: 0.90
+                    vlt: 5
+                    penalty: 1000
+                    init_stock: 1000
+                    production_rate: 200
+
+

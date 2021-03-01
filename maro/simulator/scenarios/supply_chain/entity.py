@@ -26,6 +26,9 @@ class EntityChildren:
 class Entity:
     # Current world instance.
     world = None
+    # Parent entity
+    parent = None
+    id = None
 
     def __init__(self, name: str, datamodel: DataModelBase, logic: LogicBase):
         self.name = name
