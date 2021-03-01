@@ -1,0 +1,16 @@
+
+# This file used to collect data model and logics that may be used to compose an entity.
+
+data_models:
+  Transport: # Alias of the datamodel, must be unique, used as index
+    class: "TransportNode"
+    module: "maro.simulator.scenarios.supply_chain.datamodels"
+    configs:
+      field_name: "default_value"
+
+logics:
+  SimpleTransport: # Alias of the logic, must be unique, used as index
+    class: "SimpleTransportLogic"
+    module: "maro.simulator.scenarios.supply_chain.logics"
+    configs:
+      field_name: "default_value"

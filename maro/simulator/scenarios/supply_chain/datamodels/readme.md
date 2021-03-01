@@ -1,0 +1,1 @@
+data model definition goes here, used to define Node in frame, they should be link to a certain unit or facility.

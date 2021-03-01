@@ -1,0 +1,30 @@
+core_definition: "core.yaml"
+entity_definition: "entities.yaml"
+
+
+world:
+  entities:
+    Factory1:
+      x: 0
+      y: 0
+      children:
+        Storage:
+          class: "DummyStorageEntity"
+          configs:
+            data_model: "configuration to override default of data model"
+            logic: "configuration to override"
+        Distribute:
+          class: "DummyDistributeEntity":
+        Sku1ProductLine:
+          class: "SkuProductEnity"
+          configs:
+            data_model:
+              sku: "id of sku"
+        Sku2ProductLine:
+          class: "SkuProductEnity"
+          configs:
+            data_model:
+              sku: "id of sku2"
+
+
+
