@@ -1,15 +1,26 @@
 
 from abc import ABC, abstractmethod
+from ..entity import Entity
 
 
 class LogicBase(ABC):
+    # Entity of current logic.
+    entity = None
+
+    # Data model instance of current entity.
+    data = None
+
+    # Current world.
+    world = None
+
+    facility = None
 
     @abstractmethod
     def initialize(self, config):
         pass
 
     @abstractmethod
-    def step(self, tick: int, datamodel: object):
+    def step(self, tick: int):
         pass
 
     @abstractmethod

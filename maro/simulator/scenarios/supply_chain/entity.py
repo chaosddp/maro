@@ -26,14 +26,16 @@ class EntityChildren:
 class Entity:
     # Current world instance.
     world = None
+
     # Parent entity
-    parent = None
+    facility = None
+
     id = None
 
-    def __init__(self, name: str, datamodel: DataModelBase, logic: LogicBase):
+    def __init__(self, name: str, data: DataModelBase, logic: LogicBase):
         self.name = name
         self.logic = logic
-        self.datamodel = datamodel
+        self.data = data
         self.children = EntityChildren(self)
 
     def step(self, tick: int):

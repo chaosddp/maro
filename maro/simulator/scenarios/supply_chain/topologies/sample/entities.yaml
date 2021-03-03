@@ -4,16 +4,16 @@
 StorageUnit:
   data_model:
     class: "StorageDataModel"
-    configs: "xxx"
   logic:
     class: "StorageLogic"
-    configs: "xxx"
 
 TransportUnit:
   data_model:
     class: "TransportDataModel"
   logic:
     class: "TransportLogic"
+  storage:
+    type: "reference"
 
 DistributionUnit:
   data_model:
@@ -47,9 +47,6 @@ SellerUnit:
     class: "SellerLogic"
 
 
-# NOTE:
-# different will original code, we will not keep the reference of parent facility's storage and distribution
-# we can find them in code from parent
 
 SKUSupplierUnit:
   children:
@@ -129,3 +126,5 @@ RetailerFacility:
   location:
     x: 0
     y: 0
+
+

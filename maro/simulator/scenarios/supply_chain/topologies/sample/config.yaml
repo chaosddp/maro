@@ -5,86 +5,124 @@ core_definition: "core.yaml"
 entity_definition: "entities.yaml"
 sku_definition: "skus.yml"
 
-# NOTE:
-# definitions follow original configuration: inventory_config_tree.py
+
+
+
 world:
   entities:
     SUPPLIER1:
       class: "SupplierFacility"
+      constructor: "SupplierFacilityConstructor"
       configs:
         storage:
-          capatity: 3000
-        distribution:
-          order_cost: 200
-        transports: # this means there are to transport unit2
-          - capacity: 200
-          - capacity: 200
-        suppliers:
-          sku1:
-            product: # configuration of SKUSupplierUnit.product
-              data_model: # configuration of SKUSupplierUnit.product.datamodel
-                cost: 100
-                vlt: 5
-                penalty: 1000
-                init_stock: 1000
-                production_rate: 200
-          sku2:
-            product:
-              data_model:
-                price: 200
-                cost: 100
-                service_level: 0.90
-                vlt: 7
-                penalty: 1000
-                init_stock: 1000
-                production_rate: 200
-          sku3:
-            product:
-              data_model:
-                price: 300
-                cost: 150
-                service_level: 0.90
-                vlt: 5
-                penalty: 1000
-                init_stock: 1000
-                production_rate: 200
-    SUPPLIER2:
-          class: "SupplierFacility"
-          configs:
-            storage:
-              capatity: 3000
-            distribution:
-              order_cost: 200
-            suppliers:
-              sku1:
-                product: # configuration of SKUSupplierUnit.product
-                  data_model: # configuration of SKUSupplierUnit.product.datamodel
-                    price: 100
-                    cost: 100
-                    service_level: 0.95
-                    vlt: 5
-                    penalty: 1000
-                    init_stock: 1000
-                    production_rate: 200
-              sku2:
-                product:
-                  data_model:
-                    price: 200
-                    cost: 100
-                    service_level: 0.90
-                    vlt: 7
-                    penalty: 1000
-                    init_stock: 1000
-                    production_rate: 200
-              sku3:
-                product:
-                  data_model:
-                    price: 300
-                    cost: 150
-                    service_level: 0.90
-                    vlt: 5
-                    penalty: 1000
-                    init_stock: 1000
-                    production_rate: 200
+          capacity: 100
+          unit_storage_cost: 1
+        transports:
+          - capacity: 1000
+            patient: 100
+          - capacity: 1000
+            patient: 100
+        skus: # 2 sku means there will be 2 skusupplier unit, construct will construct it
+            name: "sku1"
+            price: 100
+            cost: 100
+            vlt: 5
+            init_stock: 1000
+            production_rate: 200
+          - name: "sku2"
+            price: 200
+            cost: 100
+            vlt: 7
+            init_stock: 1000
+            production_rate: 200
+            penalty: 10
+          - name: "sku3"
+            price: 400
+            cost: 100
+            vlt: 3
+            init_stock: 1000
+            production_rate: 100
+            penalty: 10
+# NOTE:
+# definitions follow original configuration: inventory_config_tree.py
+# world:
+#   entities:
+#     SUPPLIER1:
+#       class: "SupplierFacility"
+#       configs:
+#         storage:
+#           capatity: 3000
+#         distribution:
+#           order_cost: 200
+#         transports: # this means there are to transport unit2
+#           - capacity: 200
+#           - capacity: 200
+#         suppliers:
+#           sku1:
+#             product: # configuration of SKUSupplierUnit.product
+#               data_model: # configuration of SKUSupplierUnit.product.datamodel
+#                 cost: 100
+#                 vlt: 5
+#                 penalty: 1000
+#                 init_stock: 1000
+#                 production_rate: 200
+#           sku2:
+#             product:
+#               data_model:
+#                 price: 200
+#                 cost: 100
+#                 service_level: 0.90
+#                 vlt: 7
+#                 penalty: 1000
+#                 init_stock: 1000
+#                 production_rate: 200
+#           sku3:
+#             product:
+#               data_model:
+#                 price: 300
+#                 cost: 150
+#                 service_level: 0.90
+#                 vlt: 5
+#                 penalty: 1000
+#                 init_stock: 1000
+#                 production_rate: 200
+#     SUPPLIER2:
+#           class: "SupplierFacility"
+#           configs:
+#             storage:
+#               capatity: 3000
+#             distribution:
+#               order_cost: 200
+#             suppliers:
+#               sku1:
+#                 product: # configuration of SKUSupplierUnit.product
+#                   data_model: # configuration of SKUSupplierUnit.product.datamodel
+#                     price: 100
+#                     cost: 100
+#                     service_level: 0.95
+#                     vlt: 5
+#                     penalty: 1000
+#                     init_stock: 1000
+#                     production_rate: 200
+#               sku2:
+#                 product:
+#                   data_model:
+#                     price: 200
+#                     cost: 100
+#                     service_level: 0.90
+#                     vlt: 7
+#                     penalty: 1000
+#                     init_stock: 1000
+#                     production_rate: 200
+#               sku3:
+#                 product:
+#                   data_model:
+#                     price: 300
+#                     cost: 150
+#                     service_level: 0.90
+#                     vlt: 5
+#                     penalty: 1000
+#                     init_stock: 1000
+#                     production_rate: 200
 
 

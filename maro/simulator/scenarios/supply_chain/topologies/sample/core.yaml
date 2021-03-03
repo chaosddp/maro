@@ -2,46 +2,45 @@
 # This file used to collect data model and logics that may be used to compose an entity.
 
 data_models:
-  modules:
-    builtin:
-      path: "maro.simulator.scenarios.supply_chain.datamodels"
-      definitions:
-        StorageDataModel:
-          class: "StorageDataModel"
-          configs: ""
-        TransportDataModel:
-          class: "TransportDataModel"
-        DistributionDataModel:
-          class: "DistributionDataModel"
-        ManufacturingDataModel:
-          class: "ManufacturingDataModel"
-        ConsumerDataModel:
-          class: "ConsumerDataModel"
-        ProductDataModel:
-          class: "ProductDataModel"
-        SellerDataModel:
-          class: "SellerDataModel"
-    3rd:
-      path: "/"
-      define:
-        class: ""
+  # key if the module name
+  builtin:
+    path: "maro.simulator.scenarios.supply_chain.datamodels"
+    definitions:
+      StorageDataModel:
+        class: "StorageDataModel"
+        builder: 
+          class: "StorageDataModelBuilder"
+          arguments: # Arguments means this is a dynamic data model that need parameter for slot number of a certain attribute
+            - "product_number" # this means this data model need to provide a argument name as 'product_number'
+      TransportDataModel:
+        class: "TransportDataModel"
+      DistributionDataModel:
+        class: "DistributionDataModel"
+      ManufacturingDataModel:
+        class: "ManufacturingDataModel"
+      ConsumerDataModel:
+        class: "ConsumerDataModel"
+      ProductDataModel:
+        class: "ProductDataModel"
+      SellerDataModel:
+        class: "SellerDataModel"
+
 
 logics:
-  modules:
+  builtin:
     path: "maro.simulator.scenarios.supply_chain.logics"
-  definitions:
-    StorageLogic:
-      class: "StorageLogic"
-      configs: ""
-    TransportLogic:
-      class: "TransportLogic"
-    DistributionLogic:
-      class: "DistributionLogic"
-    ManufacturingLogic:
-      class: "ManufacturingLogic"
-    ConsumerLogic:
-      class: "ConsumerLogic"
-    ProductLogic:
-      class: "ProductLogic"
-    SellerLogic:
-      class: "SellerLogic"
+    definitions:
+      StorageLogic:
+        class: "StorageLogic"
+      TransportLogic:
+        class: "SimpleTransportLogic"
+      DistributionLogic:
+        class: "DistributionLogic"
+      ManufacturingLogic:
+        class: "ManufacturingLogic"
+      ConsumerLogic:
+        class: "ConsumerLogic"
+      ProductLogic:
+        class: "ProductLogic"
+      SellerLogic:
+        class: "SellerLogic"

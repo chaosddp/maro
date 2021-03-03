@@ -5,29 +5,37 @@ from maro.backends.backend import AttributeType
 
 @node("transport")
 class TransportDataModel(DataModelBase):
-    # Index of source storage unit
-    source = NodeAttribute(AttributeType.UINT)
+    # Id of current entity
+    source = NodeAttribute(AttributeType.INT)
 
-    # Index of destination storage unit
-    destination = NodeAttribute(AttributeType.UINT)
+    # Id of target entity.
+    destination = NodeAttribute(AttributeType.INT)
 
     # Number of product.
-    payload = NodeAttribute(AttributeType.UINT)
+    payload = NodeAttribute(AttributeType.INT)
 
     # Index of product.
-    product_id = NodeAttribute(AttributeType.UINT)
+    product_id = NodeAttribute(AttributeType.INT)
+
+    requested_quantity = NodeAttribute(AttributeType.INT)
 
     # Patient to wait for products ready.
-    patient = NodeAttribute(AttributeType.UINT)
+    patient = NodeAttribute(AttributeType.INT)
 
-    # Step to destination.
-    step = NodeAttribute(AttributeType.UINT)
+    # Steps to destination.
+    steps = NodeAttribute(AttributeType.INT)
 
     # Current location on the way, equal to step means arrive at destination.
-    location = NodeAttribute(AttributeType.UINT)
+    location = NodeAttribute(AttributeType.INT)
 
-    def initialize(self, configs):
-        pass
+    def __init__(self):
+        self._patient = 0
+
+    def initialize(self, configs: dict):
+        if configs is not None:
+            self._patient = configs.get("patient", 100)
+
+            self.reset()
 
     def reset(self):
-        pass
+        self.patient = self._patient
