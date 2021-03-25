@@ -10,7 +10,7 @@ from maro.simulator.scenarios.supply_chain import ConsumerAction
 def main():
     start_tick = 0
     durations = 100
-    env = Env(scenario="supply_chain", topology="sample1", start_tick=start_tick, durations=durations)
+    env = Env(scenario="supply_chain_lite", topology="sample1", start_tick=start_tick, durations=durations)
     total_episodes = 10
 
     matrics = None

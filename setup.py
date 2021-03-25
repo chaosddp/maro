@@ -5,6 +5,7 @@ import io
 import os
 import sys
 import numpy
+from glob import glob
 
 # NOTE: DO NOT change the import order, as sometimes there is a conflict between setuptools and distutils,
 # it will cause following error:
@@ -12,6 +13,22 @@ import numpy
 from setuptools import find_packages
 from distutils.core import setup
 from distutils.extension import Extension
+from pybind11.setup_helpers import Pybind11Extension
+
+backend_lite_ext = Pybind11Extension(
+        "maro.backends.lite",
+        # Sort source files for reproducibility
+        sorted(glob("./maro/backends/lite/*.cpp") + \
+        glob("./maro/backends/raw/*.cpp")),
+    )
+
+# sc_ext = Pybind11Extension(
+#         "maro.simulator.scenarios.supply_chain_hybrid",
+#         # Sort source files for reproducibility
+#         sources = sorted(glob("./maro/simulator/supply_chain_hybrid/src/*.cpp") + \
+#             glob("./maro/backends/raw/*.cpp") + \
+#             glob("./maro/simulator/supply_chain_hybrid/yaml-cpp-master/src/*.cpp", recursive=True))
+#     )
 
 from maro import __version__
 
@@ -30,7 +47,8 @@ BASE_SRC_PATH = "./maro/backends"
 BASE_MODULE_NAME = "maro.backends"
 
 # extensions to be compiled
-extensions = []
+extensions = [backend_lite_ext]
+
 cython_directives = {"embedsignature": True}
 compile_conditions = {}
 
@@ -60,7 +78,6 @@ extensions.append(
 )
 
 # raw implementation
-# NOTE: not implemented now
 extensions.append(
     Extension(
         f"{BASE_MODULE_NAME}.raw_backend",

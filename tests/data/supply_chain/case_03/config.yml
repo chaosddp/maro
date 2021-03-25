@@ -8,7 +8,6 @@ core:
           # NOTE: do not conflict with built-in ones
           SimpleSellerUnit:
             class: "SimpleSellerUnit"
-            datamodel: "SellerDataModel"
 
 
 normal_vehicle: &normal_vehicle

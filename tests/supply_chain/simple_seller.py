@@ -1,5 +1,5 @@
 
-from maro.simulator.scenarios.supply_chain import SellerUnit
+from maro.simulator.scenarios.supply_chain_lite import SellerUnit
 
 
 class SimpleSellerUnit(SellerUnit):

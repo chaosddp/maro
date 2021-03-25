@@ -4,10 +4,10 @@ import unittest
 import numpy as np
 
 from maro.simulator import Env
-from maro.simulator.scenarios.supply_chain import ManufactureAction, ConsumerAction
-from maro.simulator.scenarios.supply_chain import StorageUnit, ConsumerUnit, FacilityBase, VehicleUnit, \
+from maro.simulator.scenarios.supply_chain_lite import ManufactureAction, ConsumerAction
+from maro.simulator.scenarios.supply_chain_lite import StorageUnit, ConsumerUnit, FacilityBase, VehicleUnit, \
     DistributionUnit, SellerUnit
-from maro.simulator.scenarios.supply_chain.units.order import Order
+from maro.simulator.scenarios.supply_chain_lite.units.order import Order
 
 
 def build_env(case_name: str, durations: int):
@@ -15,7 +15,7 @@ def build_env(case_name: str, durations: int):
 
     # config_path = os.path.join(case_folder, "config.yml")
 
-    env = Env(scenario="supply_chain", topology=case_folder, durations=durations)
+    env = Env(scenario="supply_chain_lite", topology=case_folder, durations=durations)
 
     return env
 
@@ -62,7 +62,7 @@ class MyTestCase(unittest.TestCase):
         manufacture_nodes = env.snapshot_list["manufacture"]
         manufacture_number = len(manufacture_nodes)
         manufacture_features = (
-            "id", "facility_id", "manufacturing_number", "production_rate", "product_id", "storage_id",
+            "id", "facility_id", "manufacture_number", "production_rate", "product_id", "storage_id",
             "product_unit_cost"
         )
 
@@ -168,7 +168,7 @@ class MyTestCase(unittest.TestCase):
         manufacture_nodes = env.snapshot_list["manufacture"]
         manufacture_number = len(manufacture_nodes)
         manufacture_features = (
-            "id", "facility_id", "manufacturing_number", "production_rate", "product_id", "storage_id",
+            "id", "facility_id", "manufacture_number", "production_rate", "product_id", "storage_id",
             "product_unit_cost"
         )
 
@@ -267,7 +267,7 @@ class MyTestCase(unittest.TestCase):
         manufacture_nodes = env.snapshot_list["manufacture"]
         manufacture_number = len(manufacture_nodes)
         manufacture_features = (
-            "id", "facility_id", "manufacturing_number", "production_rate", "product_id", "storage_id",
+            "id", "facility_id", "manufacture_number", "production_rate", "product_id", "storage_id",
             "product_unit_cost"
         )
 
@@ -637,25 +637,24 @@ class MyTestCase(unittest.TestCase):
         # check initial state
         self.assertEqual(0, sku3_consumer_unit.received)
         self.assertEqual(0, sku3_consumer_unit.purchased)
-        self.assertEqual(0, sku3_consumer_unit.order_cost)
+        self.assertEqual(0, sku3_consumer_unit.order_product_cost)
         self.assertEqual(SKU3_ID, sku3_consumer_unit.product_id)
 
         # check data model state
         # order cost from configuration
-        self.assertEqual(200, sku3_consumer_unit.data_model.order_cost)
-        self.assertEqual(0, sku3_consumer_unit.data_model.total_purchased)
-        self.assertEqual(0, sku3_consumer_unit.data_model.total_received)
+        self.assertEqual(200, sku3_consumer_unit.order_cost)
+        self.assertEqual(0, sku3_consumer_unit.total_purchased)
+        self.assertEqual(0, sku3_consumer_unit.total_received)
 
         # NOTE: 0 is an invalid(initial) id
-        self.assertEqual(SKU3_ID, sku3_consumer_unit.data_model.product_id)
-        self.assertEqual(sku3_consumer_unit_id, sku3_consumer_unit.data_model.id)
-        self.assertEqual(sku3_product_unit_id, sku3_consumer_unit.data_model.product_unit_id)
-        self.assertEqual(0, sku3_consumer_unit.data_model.source_id)
-        self.assertEqual(0, sku3_consumer_unit.data_model.quantity)
-        self.assertEqual(0, sku3_consumer_unit.data_model.vlt)
-        self.assertEqual(0, sku3_consumer_unit.data_model.purchased)
-        self.assertEqual(0, sku3_consumer_unit.data_model.received)
-        self.assertEqual(0, sku3_consumer_unit.data_model.order_product_cost)
+        self.assertEqual(SKU3_ID, sku3_consumer_unit.product_id)
+        self.assertEqual(sku3_consumer_unit_id, sku3_consumer_unit.id)
+        self.assertEqual(0, sku3_consumer_unit.source_id)
+        self.assertEqual(0, sku3_consumer_unit.quantity)
+        self.assertEqual(0, sku3_consumer_unit.vlt)
+        self.assertEqual(0, sku3_consumer_unit.purchased)
+        self.assertEqual(0, sku3_consumer_unit.received)
+        self.assertEqual(0, sku3_consumer_unit.order_product_cost)
 
         # check sources
         for source_facility_id in sku3_consumer_unit.sources:
@@ -902,7 +901,7 @@ class MyTestCase(unittest.TestCase):
 
         # check initial state according to configuration file
         self.assertEqual(10, vehicle_unit.max_patient)
-        self.assertEqual(10, vehicle_unit.data_model.patient)
+        self.assertEqual(10, vehicle_unit.patient)
 
         self.assertEqual(0, vehicle_unit.quantity)
         # not destination at first
@@ -923,14 +922,14 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(0, vehicle_unit.velocity)
 
         # state in frame
-        self.assertEqual(0, vehicle_unit.data_model.source)
-        self.assertEqual(0, vehicle_unit.data_model.destination)
-        self.assertEqual(0, vehicle_unit.data_model.payload)
-        self.assertEqual(0, vehicle_unit.data_model.product_id)
-        self.assertEqual(0, vehicle_unit.data_model.requested_quantity)
-        self.assertEqual(0, vehicle_unit.data_model.steps)
-        self.assertEqual(12, vehicle_unit.data_model.unit_transport_cost)
-        self.assertListEqual([-1, -1], vehicle_unit.data_model.position[:])
+        self.assertEqual(0, vehicle_unit.source)
+        self.assertEqual(0, vehicle_unit.destination_id)
+        self.assertEqual(0, vehicle_unit.payload)
+        self.assertEqual(0, vehicle_unit.product_id)
+        self.assertEqual(0, vehicle_unit.requested_quantity)
+        self.assertEqual(0, vehicle_unit.steps)
+        self.assertEqual(12, vehicle_unit.unit_transport_cost)
+        self.assertListEqual([-1, -1], vehicle_unit.position[:])
 
         # reset to check again
         env.step(None)
@@ -938,7 +937,7 @@ class MyTestCase(unittest.TestCase):
 
         # check initial state according to configuration file
         self.assertEqual(10, vehicle_unit.max_patient)
-        self.assertEqual(10, vehicle_unit.data_model.patient)
+        self.assertEqual(10, vehicle_unit.patient)
 
         # not destination at first
         self.assertIsNone(vehicle_unit.destination)
@@ -960,14 +959,14 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(0, vehicle_unit.quantity)
 
         # state in frame
-        self.assertEqual(0, vehicle_unit.data_model.source)
-        self.assertEqual(0, vehicle_unit.data_model.destination)
-        self.assertEqual(0, vehicle_unit.data_model.payload)
-        self.assertEqual(0, vehicle_unit.data_model.product_id)
-        self.assertEqual(0, vehicle_unit.data_model.requested_quantity)
-        self.assertEqual(0, vehicle_unit.data_model.steps)
-        self.assertEqual(12, vehicle_unit.data_model.unit_transport_cost)
-        self.assertListEqual([-1, -1], vehicle_unit.data_model.position[:])
+        self.assertEqual(0, vehicle_unit.source)
+        self.assertEqual(0, vehicle_unit.destination_id)
+        self.assertEqual(0, vehicle_unit.payload)
+        self.assertEqual(0, vehicle_unit.product_id)
+        self.assertEqual(0, vehicle_unit.requested_quantity)
+        self.assertEqual(0, vehicle_unit.steps)
+        self.assertEqual(12, vehicle_unit.unit_transport_cost)
+        self.assertListEqual([-1, -1], vehicle_unit.position[:])
 
     def test_vehicle_unit_schedule(self):
         env = build_env("case_02", 100)
@@ -1008,7 +1007,7 @@ class MyTestCase(unittest.TestCase):
             "id",
             "facility_id",
             "source",
-            "destination",
+            "destination_id",
             "payload",
             "product_id",
             "requested_quantity",
@@ -1093,7 +1092,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(0, states[5])
         self.assertEqual(0, states[6])
         self.assertEqual(0, states[7])
-        self.assertEqual(12, vehicle_unit.data_model.unit_transport_cost)
+        self.assertEqual(12, vehicle_unit.unit_transport_cost)
 
         pos = vehicle_nodes[env.frame_index:vehicle_unit.data_model_index:"position"].flatten().astype(np.int)
         self.assertListEqual([-1, -1], list(pos))
@@ -1126,25 +1125,25 @@ class MyTestCase(unittest.TestCase):
 
         # the patient will -1 as no enough product so load
         self.assertEqual(10 - 1, vehicle_unit.patient)
-        self.assertEqual(10 - 1, vehicle_unit.data_model.patient)
+        self.assertEqual(10 - 1, vehicle_unit.patient)
 
         # no payload
         self.assertEqual(0, vehicle_unit.payload)
-        self.assertEqual(0, vehicle_unit.data_model.payload)
+        self.assertEqual(0, vehicle_unit.payload)
 
         # step 9 ticks, patient will be 0
         for i in range(10 - 1):
             env.step(None)
 
             self.assertEqual(10 - 1 - (i + 1), vehicle_unit.patient)
-            self.assertEqual(10 - 1 - (i + 1), vehicle_unit.data_model.patient)
+            self.assertEqual(10 - 1 - (i + 1), vehicle_unit.patient)
 
         vehicle_nodes = env.snapshot_list["vehicle"]
         features = (
             "id",
             "facility_id",
             "source",
-            "destination",
+            "destination_id",
             "payload",
             "product_id",
             "requested_quantity",
@@ -1188,7 +1187,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(0, states[5])
         self.assertEqual(0, states[6])
         self.assertEqual(0, states[7])
-        self.assertEqual(12, vehicle_unit.data_model.unit_transport_cost)
+        self.assertEqual(12, vehicle_unit.unit_transport_cost)
 
         pos = vehicle_nodes[env.frame_index:vehicle_unit.data_model_index:"position"].flatten().astype(np.int)
         self.assertListEqual([-1, -1], list(pos))
@@ -1248,7 +1247,7 @@ class MyTestCase(unittest.TestCase):
         steps_states = vehicle_nodes[:vehicle_unit.data_model_index:"steps"].flatten().astype(np.int)
         self.assertListEqual([3, 2, 1] + [0] * 97, list(steps_states))
 
-        destination_states = vehicle_nodes[:vehicle_unit.data_model_index:"destination"].flatten().astype(np.int)
+        destination_states = vehicle_nodes[:vehicle_unit.data_model_index:"destination_id"].flatten().astype(np.int)
         self.assertListEqual([dest_facility.id] * 100, list(destination_states))
 
     """
@@ -1281,9 +1280,9 @@ class MyTestCase(unittest.TestCase):
         self.assertListEqual([3], dist_unit.product_list)
 
         # from configuration
-        self.assertEqual(1, dist_unit.data_model.unit_price)
-        self.assertListEqual([3], list(dist_unit.data_model.product_list[:]))
-        self.assertListEqual([0], list(dist_unit.data_model.delay_order_penalty))
+        self.assertEqual(1, dist_unit.unit_price)
+        self.assertListEqual([3], list(dist_unit.product_list[:]))
+        self.assertListEqual([0], list(dist_unit.delay_order_penalty))
 
         # reset
         env.reset()
@@ -1295,9 +1294,9 @@ class MyTestCase(unittest.TestCase):
         self.assertListEqual([3], dist_unit.product_list)
 
         # from configuration
-        self.assertEqual(1, dist_unit.data_model.unit_price)
-        self.assertListEqual([3], list(dist_unit.data_model.product_list[:]))
-        self.assertListEqual([0], list(dist_unit.data_model.delay_order_penalty))
+        self.assertEqual(1, dist_unit.unit_price)
+        self.assertListEqual([3], list(dist_unit.product_list[:]))
+        self.assertListEqual([0], list(dist_unit.delay_order_penalty))
 
     def test_distribution_unit_dispatch_order(self):
         env = build_env("case_02", 100)
@@ -1365,7 +1364,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(SKU3_ID, second_vehicle.product_id)
 
         # from configuration
-        self.assertEqual(20, dist_unit.data_model.delay_order_penalty[0])
+        self.assertEqual(20, dist_unit.delay_order_penalty[0])
 
     """
     Seller unit test:
@@ -1400,9 +1399,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
         #
-        self.assertEqual(0, sell_unit.data_model.sold)
-        self.assertEqual(0, sell_unit.data_model.demand)
-        self.assertEqual(0, sell_unit.data_model.total_sold)
+        self.assertEqual(0, sell_unit.sold)
+        self.assertEqual(0, sell_unit.demand)
+        self.assertEqual(0, sell_unit.total_sold)
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
         env.reset()
@@ -1417,9 +1416,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
         #
-        self.assertEqual(0, sell_unit.data_model.sold)
-        self.assertEqual(0, sell_unit.data_model.demand)
-        self.assertEqual(0, sell_unit.data_model.total_sold)
+        self.assertEqual(0, sell_unit.sold)
+        self.assertEqual(0, sell_unit.demand)
+        self.assertEqual(0, sell_unit.total_sold)
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
     def test_seller_unit_demand_states(self):
@@ -1448,14 +1447,14 @@ class MyTestCase(unittest.TestCase):
 
         # demand should be same with original
         self.assertEqual(demand, sell_unit.demand)
-        self.assertEqual(demand, sell_unit.data_model.demand)
+        self.assertEqual(demand, sell_unit.demand)
 
         actual_sold = min(demand, SKU3_INIT_NUMBER)
         # sold may be not same as demand, depend on remaining number in storage
         self.assertEqual(actual_sold, sell_unit.sold)
-        self.assertEqual(actual_sold, sell_unit.data_model.sold)
+        self.assertEqual(actual_sold, sell_unit.sold)
         self.assertEqual(actual_sold, sell_unit.total_sold)
-        self.assertEqual(actual_sold, sell_unit.data_model.total_sold)
+        self.assertEqual(actual_sold, sell_unit.total_sold)
 
         states = env.snapshot_list["seller"][
                  env.frame_index:sell_unit.data_model_index:("sold", "demand", "total_sold")].flatten().astype(np.int)
@@ -1471,15 +1470,15 @@ class MyTestCase(unittest.TestCase):
 
         # demand should be same with original
         self.assertEqual(demand, sell_unit.demand)
-        self.assertEqual(demand, sell_unit.data_model.demand)
+        self.assertEqual(demand, sell_unit.demand)
 
         actual_sold_2 = min(demand, SKU3_INIT_NUMBER - actual_sold)
 
         # sold may be not same as demand, depend on remaining number in storage
         self.assertEqual(actual_sold_2, sell_unit.sold)
-        self.assertEqual(actual_sold_2, sell_unit.data_model.sold)
+        self.assertEqual(actual_sold_2, sell_unit.sold)
         self.assertEqual(actual_sold + actual_sold_2, sell_unit.total_sold)
-        self.assertEqual(actual_sold + actual_sold_2, sell_unit.data_model.total_sold)
+        self.assertEqual(actual_sold + actual_sold_2, sell_unit.total_sold)
 
         states = env.snapshot_list["seller"][
                  env.frame_index:sell_unit.data_model_index:("sold", "demand", "total_sold")].flatten().astype(np.int)
@@ -1516,9 +1515,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
         #
-        self.assertEqual(0, sell_unit.data_model.sold)
-        self.assertEqual(0, sell_unit.data_model.demand)
-        self.assertEqual(0, sell_unit.data_model.total_sold)
+        self.assertEqual(0, sell_unit.sold)
+        self.assertEqual(0, sell_unit.demand)
+        self.assertEqual(0, sell_unit.total_sold)
         self.assertEqual(SKU3_ID, sell_unit.product_id)
 
         is_done = False

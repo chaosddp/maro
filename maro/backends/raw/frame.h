@@ -129,6 +129,9 @@ namespace maro
         template<typename T>
         typename Attribute_Trait<T>::type get_value(NODE_INDEX node_index, ATTR_TYPE attr_type, SLOT_INDEX slot_index);
 
+        Attribute& get_attr(NODE_INDEX node_index, ATTR_TYPE attr_type, SLOT_INDEX slot_index);
+        AttrDataType get_attr_type(ATTR_TYPE attr_type);
+
         /// <summary>
         /// Set value for specified attribute.
         /// </summary>

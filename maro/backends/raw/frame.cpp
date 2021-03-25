@@ -175,6 +175,28 @@ namespace maro
         return node_type < _nodes.size();
       }
 
+      Attribute& Frame::get_attr(NODE_INDEX node_index, ATTR_TYPE attr_type, SLOT_INDEX slot_index)
+      {
+        NODE_TYPE node_type = extract_node_type(attr_type);
+
+        auto& node = get_node(node_type);
+
+        auto& target_attr = node.get_attr(node_index, attr_type, slot_index);
+
+        return target_attr;
+      }
+
+      AttrDataType Frame::get_attr_type(ATTR_TYPE attr_type)
+      {
+        NODE_TYPE node_type = extract_node_type(attr_type);
+
+        auto& node = get_node(node_type);
+
+        auto& def = node.get_attr_definition(attr_type);
+
+        return def.data_type;
+      }
+
       template<typename T>
       typename Attribute_Trait<T>::type Frame::get_value(NODE_INDEX node_index, ATTR_TYPE attr_type, SLOT_INDEX slot_index)
       {

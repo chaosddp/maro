@@ -1,0 +1,348 @@
+facility_definitions:
+  RetailerFacility:
+    children:
+      products:
+        class: ProductUnit
+        config:
+          consumer:
+            class: ConsumerUnit
+          seller:
+            class: SellerUnit
+        is_template: true
+      storage:
+        class: StorageUnit
+    class: RetailerFacility
+  SupplierFacility:
+    children:
+      distribution:
+        class: DistributionUnit
+      products:
+        class: ProductUnit
+        config:
+          consumer:
+            class: ConsumerUnit
+          manufacture:
+            class: ManufactureUnit
+        is_template: true
+      storage:
+        class: StorageUnit
+    class: SupplierFacility
+  WarehouseFacility:
+    children:
+      distribution:
+        class: DistributionUnit
+      products:
+        class: ProductUnit
+        config:
+          consumer:
+            class: ConsumerUnit
+        is_template: true
+      storage:
+        class: StorageUnit
+    class: WarehouseFacility
+normal_vehicle: &id001
+  class: VehicleUnit
+  config:
+    patient: 100
+    unit_transport_cost: 1
+world:
+  facilities:
+  - children:
+      distribution:
+        children:
+          vehicles:
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+        config:
+          unit_price: 1
+      storage:
+        config:
+          capacity: 35400
+          unit_storage_cost: 1
+    config:
+      delay_order_penalty: 1000
+      order_cost: 200
+    definition_ref: SupplierFacility
+    name: SUPPLIER0
+    skus:
+      SKU0:
+        cost: 300
+        init_stock: 2450
+        price: 334
+        production_rate: 2450
+        type: production
+        vlt: 3
+      SKU1:
+        cost: 224
+        init_stock: 4200
+        price: 249
+        production_rate: 4200
+        type: production
+        vlt: 3
+      SKU2:
+        cost: 161
+        init_stock: 3950
+        price: 179
+        production_rate: 3950
+        type: production
+        vlt: 3
+      SKU3:
+        cost: 257
+        init_stock: 4250
+        price: 286
+        production_rate: 4250
+        type: production
+        vlt: 3
+      SKU4:
+        cost: 438
+        init_stock: 2850
+        price: 487
+        production_rate: 2850
+        type: production
+        vlt: 3
+  - children:
+      distribution:
+        children:
+          vehicles:
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+          - *id001
+        config:
+          unit_price: 1
+      storage:
+        config:
+          capacity: 35400
+          unit_storage_cost: 1
+    config:
+      delay_order_penalty: 1000
+      order_cost: 500
+    definition_ref: WarehouseFacility
+    name: WAREHOUSE0
+    skus:
+      SKU0:
+        cost: 300
+        init_stock: 980
+        price: 334
+        vlt: 3
+      SKU1:
+        cost: 224
+        init_stock: 1680
+        price: 249
+        vlt: 3
+      SKU2:
+        cost: 161
+        init_stock: 1580
+        price: 179
+        vlt: 3
+      SKU3:
+        cost: 257
+        init_stock: 1700
+        price: 286
+        vlt: 3
+      SKU4:
+        cost: 438
+        init_stock: 1140
+        price: 487
+        vlt: 3
+  - children:
+      storage:
+        config:
+          capacity: 7080
+          unit_storage_cost: 1
+    config:
+      order_cost: 500
+    definition_ref: RetailerFacility
+    name: STORE0
+    skus:
+      SKU0:
+        constraint: G(low_profit -> low_stock_constraint)
+        cost: 300
+        init_stock: 294
+        max_stock: 1000
+        price: 334
+        sale_gamma: 49
+        vlt: 3
+      SKU1:
+        constraint: null
+        cost: 224
+        init_stock: 588
+        max_stock: 1000
+        price: 249
+        sale_gamma: 84
+        vlt: 3
+      SKU2:
+        constraint: null
+        cost: 161
+        init_stock: 316
+        max_stock: 1000
+        price: 179
+        sale_gamma: 79
+        vlt: 3
+      SKU3:
+        constraint: G(stock_constraint)
+        cost: 257
+        init_stock: 340
+        max_stock: 1000
+        price: 286
+        sale_gamma: 85
+        vlt: 3
+      SKU4:
+        constraint: G(stock_constraint)
+        cost: 438
+        init_stock: 114
+        max_stock: 1000
+        price: 487
+        sale_gamma: 57
+        vlt: 3
+  grid:
+    facilities:
+      STORE0:
+      - 19
+      - 17
+      SUPPLIER0:
+      - 10
+      - 3
+      WAREHOUSE0:
+      - 6
+      - 6
+    size:
+    - 20
+    - 20
+  settings:
+    constraint_state_hist_len: 4
+    constraint_violate_reward: -10000000.0
+    global_reward_weight_consumer: 0.5
+    global_reward_weight_producer: 0.5
+    initial_balance: 100000
+    replenishment_discount: 0.9
+    reward_normalization: 10000000.0
+    total_echelons: 3
+  skus:
+  - id: 0
+    name: SKU0
+  - id: 1
+    name: SKU1
+  - id: 2
+    name: SKU2
+  - id: 3
+    name: SKU3
+  - id: 4
+    name: SKU4
+  topology:
+    STORE0:
+      SKU0:
+      - WAREHOUSE0
+      SKU1:
+      - WAREHOUSE0
+      SKU2:
+      - WAREHOUSE0
+      SKU3:
+      - WAREHOUSE0
+      SKU4:
+      - WAREHOUSE0
+    WAREHOUSE0:
+      SKU0:
+      - SUPPLIER0
+      SKU1:
+      - SUPPLIER0
+      SKU2:
+      - SUPPLIER0
+      SKU3:
+      - SUPPLIER0
+      SKU4:
+      - SUPPLIER0
