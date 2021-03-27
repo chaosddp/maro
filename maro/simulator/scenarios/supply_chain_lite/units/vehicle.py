@@ -13,7 +13,26 @@ class VehicleUnit(UnitBase):
 
     data_model_name = "vehicle"
 
+    data_model_attributes = {
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+        "position": (AttrDataType.Int, 2, False, False),
+        "unit_transport_cost": (AttrDataType.Int, 1, False, False),
+        "requested_quantity": (AttrDataType.Int, 1, False, False),
+        "destination_id": (AttrDataType.Int, 1, False, False),
+        "source": (AttrDataType.Int, 1, False, False),
+        "patient": (AttrDataType.Int, 1, False, False),
+        "quantity": (AttrDataType.Int, 1, False, False),
+        "velocity": (AttrDataType.Int, 1, False, False),
+        "payload": (AttrDataType.Int, 1, False, False),
+        "steps": (AttrDataType.Int, 1, False, False),
+        "product_id": (AttrDataType.Int, 1, False, False),
+    }
+
     def __init__(self):
+        super(VehicleUnit, self).__init__()
+
         # Max patient of current vehicle.
         self.max_patient: int = None
 

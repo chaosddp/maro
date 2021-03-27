@@ -95,6 +95,14 @@ extensions.append(
         extra_compile_args=[compile_flag])
 )
 
+extensions.append(
+    Extension(
+        f"{BASE_MODULE_NAME}.rlite",
+        sources=[f"{BASE_SRC_PATH}/rlite.cpp"],
+        include_dirs=include_dirs,
+        extra_compile_args=[compile_flag]
+    )
+)
 
 readme = io.open("./maro/README.rst", encoding="utf-8").read()
 

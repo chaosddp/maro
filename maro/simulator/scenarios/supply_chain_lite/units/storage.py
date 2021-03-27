@@ -13,8 +13,19 @@ class StorageUnit(UnitBase):
 
     data_model_name = "storage"
 
+    data_model_attributes = {
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+        "product_number": (AttrDataType.Int, 1, False, True),
+        "product_list": (AttrDataType.Int, 1, False, True),
+        "capacity": (AttrDataType.Int, 1, False, False),
+        "remaining_space": (AttrDataType.Int, 1, False, False),
+        "unit_storage_cost": (AttrDataType.Int, 1, False, False),
+    }
+
     def __init__(self):
-        super().__init__()
+        super(StorageUnit, self).__init__()
 
         # We use these variables to hold changes at python side, flash to frame before taking snapshot.
         self.product_number = []

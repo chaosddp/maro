@@ -16,7 +16,21 @@ class ManufactureUnit(SkuUnit):
 
     data_model_name = "manufacture"
 
+    data_model_attributes = {
+        "product_id": (AttrDataType.Int, 1, False, False),
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+        "output_units_per_lot": (AttrDataType.Int, 1, False, False),
+        "input_units_per_lot": (AttrDataType.Int, 1, False, False),
+        "manufacture_number": (AttrDataType.Int, 1, False, False),
+        "storage_id": (AttrDataType.Int, 1, False, False),
+        "product_unit_cost": (AttrDataType.Int, 1, False, False),
+        "production_rate": (AttrDataType.Int, 1, False, False),
+    }
+
     def __init__(self):
+        super(ManufactureUnit, self).__init__()
         # Source material sku and related number per produce cycle.
         self.bom = None
 

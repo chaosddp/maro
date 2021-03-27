@@ -16,6 +16,18 @@ class SellerUnit(SkuUnit):
 
     data_model_name = "seller"
 
+    data_model_attributes = {
+        "product_id": (AttrDataType.Int, 1, False, False),
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+
+        "gamma": (AttrDataType.Int, 1, False, False),
+        "sold": (AttrDataType.Int, 1, False, False),
+        "demand": (AttrDataType.Int, 1, False, False),
+        "total_sold": (AttrDataType.Int, 1, False, False),
+    }
+
     def __init__(self):
         super(SellerUnit, self).__init__()
 

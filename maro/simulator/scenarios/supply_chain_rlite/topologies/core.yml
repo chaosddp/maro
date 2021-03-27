@@ -1,0 +1,30 @@
+
+units:
+  modules:
+    - path: "maro.simulator.scenarios.supply_chain_rlite.units"
+      definitions:
+        StorageUnit:
+          class: "StorageUnit"
+        VehicleUnit:
+          class: "VehicleUnit"
+        DistributionUnit:
+          class: "DistributionUnit"
+        ConsumerUnit:
+          class: "ConsumerUnit"
+        SellerUnit:
+          class: "SellerUnit"
+        ManufactureUnit:
+          class: "ManufactureUnit"
+        ProductUnit:
+          class: "ProductUnit"
+
+facilities:
+  modules:
+    - path: "maro.simulator.scenarios.supply_chain_rlite.facilities"
+      definitions:
+        WarehouseFacility:
+          class: "WarehouseFacility"
+        SupplierFacility:
+          class: "SupplierFacility"
+        RetailerFacility:
+          class: "RetailerFacility"

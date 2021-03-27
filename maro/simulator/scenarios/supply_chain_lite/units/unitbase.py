@@ -1,6 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+from functools import partial
+from maro.backends.lite import Frame, AttrDataType
+
 
 class UnitBase:
     """Base of all unit used to contain related logic.
@@ -49,6 +52,17 @@ class UnitBase:
 
     # Current unit configurations.
     config: dict = None
+
+    # What attribute need to be saved into frame.
+    # Expect a dictionary that key is the attribute name, value is a tuple (data type, slot number, is const, is list)
+    data_model_attributes: dict = None
+
+    def __init__(self):
+        self.attribute_check_list = {}
+
+        if self.data_model_attributes is not None:
+            for attr_name in self.data_model_attributes.keys():
+                self.attribute_check_list[attr_name] = True
 
     def parse_configs(self, config: dict):
         """Parse configurations from config.
@@ -108,6 +122,13 @@ class UnitBase:
             "children": None if self.children is None else [c.get_unit_info() for c in self.children]
         }
 
-    @staticmethod
-    def register_data_model(frame):
-        pass
+    def __setattr__(self, key, value):
+        # attributes = {
+        #     "id": (AttrDataType.Int, 1, False, False),
+        #     "facility_id": (AttrDataType.Int, 1, False, False)
+        # }
+
+        super().__setattr__(key, value)
+
+        if self.data_model_attributes is not None and key in self.data_model_attributes:
+            self.attribute_check_list[key] = True

@@ -186,7 +186,9 @@ class World:
             if class_type.data_model_name is not None:
                 self.frame.register_node(class_type.data_model_name, number)
 
-                class_type.register_data_model(self.frame)
+                # class_type.register_data_model(self.frame)
+                for attr_name, attr_def in class_type.data_model_attributes.items():
+                    self.frame.register_attr(class_type.data_model_name, attr_name, attr_def[0], attr_def[1], attr_def[2], attr_def[3])
 
         self.frame.setup()
 

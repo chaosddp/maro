@@ -21,21 +21,32 @@ class DistributionUnit(UnitBase):
 
     data_model_name = "distribution"
 
+    data_model_attributes = {
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+        "product_list": (AttrDataType.Int, 1, False, True,),
+        "check_in_price": (AttrDataType.Int, 1, False, True,),
+        "delay_order_penalty": (AttrDataType.Int, 1, False, True,),
+        "unit_price": (AttrDataType.Int, 1, False, False),
+    }
+
     def __init__(self):
-        self.order_queue = deque()
+        super(DistributionUnit, self).__init__()
+        self.order_queue=deque()
 
         # Used to map from product id to slot index.
-        self.product_index_mapping: Dict[int, int] = {}
+        self.product_index_mapping: Dict[int, int]={}
 
         # What product we will carry.
-        self.product_list = []
-        self.check_in_price = []
-        self.delay_order_penalty = []
-        self.unit_price = 0
+        self.product_list=[]
+        self.check_in_price=[]
+        self.delay_order_penalty=[]
+        self.unit_price=0
 
-    @staticmethod
+    @ staticmethod
     def register_data_model(frame: Frame):
-        register = partial(frame.register_attr, DistributionUnit.data_model_name)
+        register=partial(frame.register_attr, DistributionUnit.data_model_name)
 
         register("id", AttrDataType.Int)
         register("facility_id", AttrDataType.Int)
@@ -51,7 +62,7 @@ class DistributionUnit(UnitBase):
         Returns:
             dict: Dictionary of order that key is product id, value is quantity.
         """
-        counter = defaultdict(int)
+        counter=defaultdict(int)
 
         for order in self.order_queue:
             counter[order.product_id] += order.quantity
@@ -68,12 +79,12 @@ class DistributionUnit(UnitBase):
             int: Total price of this order.
         """
         if order.quantity > 0:
-            sku = self.facility.skus[order.product_id]
+            sku=self.facility.skus[order.product_id]
 
             if sku is not None:
                 self.order_queue.append(order)
 
-                order_total_price = sku.price * order.quantity
+                order_total_price=sku.price * order.quantity
 
                 # TODO: states related, enable it later if needed.
                 # product_index = self.product_index_mapping[order.product_id]
@@ -86,14 +97,14 @@ class DistributionUnit(UnitBase):
     def initialize(self):
         super(DistributionUnit, self).initialize()
 
-        self.unit_price = self.facility.get_config("unit_price", 1)
+        self.unit_price=self.facility.get_config("unit_price", 1)
 
         # Init product list in data model.
-        index = 0
+        index=0
         for sku_id, sku in self.facility.skus.items():
             self.product_list.append(sku_id)
             self.delay_order_penalty.append(0)
-            self.product_index_mapping[sku_id] = index
+            self.product_index_mapping[sku_id]=index
 
             index += 1
 
@@ -101,7 +112,7 @@ class DistributionUnit(UnitBase):
         for vehicle in self.vehicles:
             # If we have vehicle not on the way and there is any pending order
             if len(self.order_queue) > 0 and vehicle.quantity == 0:
-                order = self.order_queue.popleft()
+                order=self.order_queue.popleft()
 
                 # Schedule a job for available vehicle.
                 # TODO: why vlt is determined by order?
@@ -118,10 +129,11 @@ class DistributionUnit(UnitBase):
         # NOTE: we moved delay_order_penalty from facility to sku, is this ok?
         # update order's delay penalty per tick.
         for order in self.order_queue:
-            sku = self.facility.skus[order.product_id]
-            product_index = self.product_index_mapping[order.product_id]
+            sku=self.facility.skus[order.product_id]
+            product_index=self.product_index_mapping[order.product_id]
 
-            self.delay_order_penalty[product_index] += self.facility.get_config("delay_order_penalty")
+            self.delay_order_penalty[product_index] += self.facility.get_config(
+                "delay_order_penalty")
 
     def flush_states(self):
         pass

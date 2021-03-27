@@ -11,6 +11,9 @@ class SkuUnit(UnitBase):
     # Product id (sku id), 0 means invalid.
     product_id: int = 0
 
+    def __init__(self):
+        super(SkuUnit, self).__init__().__init__()
+
     def initialize(self):
         super(SkuUnit, self).initialize()
 

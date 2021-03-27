@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-from functools  import partial
+from functools import partial
 import warnings
 from collections import Counter, defaultdict
 from maro.backends.lite import AttrDataType, Frame
@@ -14,6 +14,23 @@ class ConsumerUnit(SkuUnit):
     """Consumer unit used to generate order to purchase from upstream by action."""
 
     data_model_name = "consumer"
+
+    data_model_attributes = {
+        "product_id": (AttrDataType.Int, 1, False, False),
+        "id": (AttrDataType.Int, 1, False, False),
+        "facility_id": (AttrDataType.Int, 1, False, False),
+        "parent_id": (AttrDataType.Int, 1, False, False),
+        "received": (AttrDataType.Int, 1, False, False),
+        "purchased": (AttrDataType.Int, 1, False, False),
+        "order_cost": (AttrDataType.Int, 1, False, False),
+        "sources": (AttrDataType.Int, 1, False, True),
+        "total_purchased": (AttrDataType.Int, 1, False, False),
+        "total_received": (AttrDataType.Int, 1, False, False),
+        "source_id": (AttrDataType.Int, 1, False, False),
+        "quantity": (AttrDataType.Int, 1, False, False),
+        "vlt": (AttrDataType.Int, 1, False, False),
+        "order_product_cost": (AttrDataType.Int, 1, False, False),
+    }
 
     def __init__(self):
         super(ConsumerUnit, self).__init__()
@@ -38,7 +55,7 @@ class ConsumerUnit(SkuUnit):
         self.parent_id = 0
 
     @staticmethod
-    def register_data_model(frame:Frame):
+    def register_data_model(frame: Frame):
         register = partial(frame.register_attr, ConsumerUnit.data_model_name)
 
         register("product_id", AttrDataType.Int)
@@ -128,13 +145,16 @@ class ConsumerUnit(SkuUnit):
 
         # NOTE: we are using product unit as destination,
         # so we expect the action.source_id is and id of product unit
-        self.update_open_orders(self.action.source_id, self.action.product_id, self.action.quantity)
+        self.update_open_orders(self.action.source_id,
+                                self.action.product_id, self.action.quantity)
 
-        order = Order(self.facility, self.action.product_id, self.action.quantity, self.action.vlt)
+        order = Order(self.facility, self.action.product_id,
+                      self.action.quantity, self.action.vlt)
 
         source_facility = self.world.get_facility_by_id(self.action.source_id)
 
-        self.order_product_cost = source_facility.distribution.place_order(order)
+        self.order_product_cost = source_facility.distribution.place_order(
+            order)
 
         self.purchased = self.action.quantity
 
