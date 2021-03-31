@@ -4,7 +4,6 @@
 from functools import partial
 from maro.backends.backend import AttributeType
 from maro.backends.rlite import FrameLite
-from .attr_list import AttributeList
 
 class UnitBase:
     """Base of all unit used to contain related logic.
@@ -53,6 +52,8 @@ class UnitBase:
 
     # Current unit configurations.
     config: dict = None
+
+    frame: FrameLite = None
 
     # What attribute need to be saved into frame.
     # Expect a dictionary that key is the attribute name, value is a tuple (data type, slot number, is const, is list)
@@ -116,6 +117,10 @@ class UnitBase:
         """
         self.action = action
 
+    def init_data_model(self):
+        for attr_name in self.data_model_attributes.keys():
+            self.frame.update(self.data_model_name, self.data_model_index, self, attr_name, getattr(self, attr_name))
+
     def get_unit_info(self) -> dict:
         return {
             "id": self.id,
@@ -124,19 +129,3 @@ class UnitBase:
             "class": type(self),
             "children": None if self.children is None else [c.get_unit_info() for c in self.children]
         }
-
-    def __setattr__(self, key, value):
-        # attributes = {
-        #     "id": (AttrDataType.Int, 1, False, False),
-        #     "facility_id": (AttrDataType.Int, 1, False, False)
-        # }
-
-        super().__setattr__(key, value)
-
-        if self.data_model_attributes is not None and key in self.data_model_attributes:
-            attr = getattr(self, key)
-
-            if type(attr) == AttributeList:
-                attr.__assign__(value)
-            else:
-                self.attribute_check_list[key] = True

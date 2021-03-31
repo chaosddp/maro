@@ -65,6 +65,7 @@ class ManufactureUnit(SkuUnit):
 
         if len(self.bom) > 0:
             self.input_units_per_lot = sum(self.bom.values())
+        super().init_data_model()
 
     def step(self, tick: int):
         # Try to produce production if we have positive rate.
@@ -110,7 +111,8 @@ class ManufactureUnit(SkuUnit):
             self.manufacture_number = 0
 
     def flush_states(self):
-        pass
+        if self.manufacture_number > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "manufacture_number", self.manufacture_number)
 
     def post_step(self, tick: int):
         self.manufacture_number = 0

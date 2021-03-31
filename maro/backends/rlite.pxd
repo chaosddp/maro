@@ -134,6 +134,6 @@ cdef class FrameLite:
         dict _node_attr_defs
         dict _attr_type_quick_mapping
 
-        list _bind_pairs
+        dict _bind_pairs
 
         dict _attr_type_dict

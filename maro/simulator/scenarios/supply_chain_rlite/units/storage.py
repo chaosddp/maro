@@ -6,7 +6,6 @@ from maro.backends.backend import AttributeType
 from maro.backends.rlite import FrameLite
 from typing import Dict
 
-from .attr_list import AttributeList
 from .unitbase import UnitBase
 
 
@@ -30,14 +29,15 @@ class StorageUnit(UnitBase):
         super(StorageUnit, self).__init__()
 
         # We use these variables to hold changes at python side, flash to frame before taking snapshot.
-        self.product_number = AttributeList([])
-        self.product_list = AttributeList([])
+        self.product_number = []
+        self.product_list = []
 
         # Used to map from product id to slot index.
         self.product_index_mapping: Dict[int, int] = {}
         self.capacity = 0
         self.remaining_space = 0
         self.unit_storage_cost = 0
+        self.is_dirty = False
 
     def try_add_products(self, product_quantities: Dict[int, int], all_or_nothing=True) -> dict:
         """Try to add products into storage.
@@ -62,6 +62,8 @@ class StorageUnit(UnitBase):
             unloaded_quantities[product_id] = unload_quantity
 
             self.remaining_space -= unload_quantity
+
+        self.is_dirty = True
 
         return unloaded_quantities
 
@@ -90,6 +92,8 @@ class StorageUnit(UnitBase):
 
             self.remaining_space += quantity
 
+        self.is_dirty = True
+
         return True
 
     def take_available(self, product_id: int, quantity: int) -> int:
@@ -109,6 +113,7 @@ class StorageUnit(UnitBase):
         self.product_number[product_index] -= actual
 
         self.remaining_space += actual
+        self.is_dirty = True
 
         return actual
 
@@ -139,8 +144,12 @@ class StorageUnit(UnitBase):
 
             self.remaining_space -= sku.init_stock
 
+        super().init_data_model()
+
     def flush_states(self):
-        pass
+        if self.is_dirty:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "product_number", self.product_number)
+            self.frame.update(self.data_model_name, self.data_model_index, self, "remaining_space", self.remaining_space)
 
     def reset(self):
         super(StorageUnit, self).reset()

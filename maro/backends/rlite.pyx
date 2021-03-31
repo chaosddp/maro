@@ -99,7 +99,7 @@ cdef class FrameLite:
         self._node_attr_defs = {}
         self._attr_type_quick_mapping = {}
 
-        self._bind_pairs = []
+        self._bind_pairs = {}
         self._attr_type_dict = {}
         self._snapshots.setup(&self._frame)
         self._snapshots.set_max_size(total_snapshots)
@@ -111,7 +111,7 @@ cdef class FrameLite:
 
         self._node_type_mapping[_node_name] = node_type
         self._node_counter[node_type] = 0
-        self._node_attr_defs[node_type] = []
+        self._node_attr_defs[node_type] = {}
         self._attr_type_quick_mapping[node_type] = {}
 
     def register_attr(self, node_name: str, attr_name: str, data_type: bytes, slot_number: int=1, is_const: bool=False, is_list: bool=False):
@@ -131,7 +131,7 @@ cdef class FrameLite:
         cdef NODE_TYPE node_type = self._node_type_mapping[_node_name]
         cdef ATTR_TYPE attr_type = self._frame.add_attr(node_type, _attr_name.encode(), dt, _slot_number, _is_const, _is_list)
 
-        cdef list attr_def_list = self._node_attr_defs[node_type]
+        cdef dict attr_def_list = self._node_attr_defs[node_type]
 
         cdef AttrDef attr_def = AttrDef()
         
@@ -142,7 +142,7 @@ cdef class FrameLite:
         attr_def.is_list = _is_list
         attr_def.attr_type = attr_type
 
-        attr_def_list.append(attr_def)
+        attr_def_list[attr_name] = attr_def
 
         self._attr_type_quick_mapping[node_type][attr_name] = attr_type
         
@@ -164,11 +164,57 @@ cdef class FrameLite:
         pair.node_type = node_type
         pair.index = index
 
-        self._bind_pairs.append(pair)
+        self._bind_pairs[(node_name, index)] = pair
 
         self._node_counter[node_type] += 1
 
         return index
+
+    def update(self, node_name: str, node_index: int, obj: object, attr_name: str, value: object):
+        cdef BindingPair pair
+        cdef NODE_INDEX _node_index = node_index
+        cdef NODE_TYPE node_type
+
+        cdef AttrDef attr_def
+        cdef AttributeAccessor attr_acc
+        cdef ATTR_TYPE attr_type
+        cdef bool is_list
+        cdef bool is_const
+        cdef SLOT_INDEX slots
+        cdef SLOT_INDEX slot_index
+        cdef int item_index = 0
+
+        pair = self._bind_pairs[(node_name, node_index)]
+        node_type = pair.node_type
+
+        attr_def= self._node_attr_defs[node_type][attr_name]
+
+        is_list = attr_def.is_list
+        is_const = attr_def.is_const
+        attr_type = attr_def.attr_type
+
+        attr_acc = self._attr_type_dict[attr_type]
+
+        slots = self._frame.get_slot_number(node_index, attr_type)
+
+        if not is_list and slots == 1:
+            attr_acc.set_value(node_index, 0, value)
+        else:
+            slot_index = 0
+
+            for item_index, item in enumerate(value):
+                if is_list:
+                    if slot_index >= slots:
+                        attr_acc.append_value(node_index, item)
+
+                        slots = self._frame.get_slot_number(node_index, attr_type)
+                        slot_index += 1
+                        
+                        continue
+
+                attr_acc.set_value(node_index, slot_index, item)
+
+                slot_index += 1
 
     def collect_states(self):
         cdef BindingPair pair

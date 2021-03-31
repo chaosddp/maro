@@ -66,6 +66,8 @@ class SellerUnit(SkuUnit):
         for _ in range(self.durations):
             self.demand_distribution.append(int(np.random.gamma(self.gamma)))
 
+        super().init_data_model()
+
     def step(self, tick: int):
         demand = self.market_demand(tick)
 
@@ -77,7 +79,12 @@ class SellerUnit(SkuUnit):
         self.demand = demand
 
     def flush_states(self):
-        pass
+        if self.sold > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "sold", self.sold)
+        if self.demand > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "demand", self.demand)
+        if self.total_sold > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "total_sold", self.total_sold)
 
     def post_step(self, tick: int):
         super(SellerUnit, self).post_step(tick)

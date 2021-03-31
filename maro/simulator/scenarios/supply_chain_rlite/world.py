@@ -218,6 +218,7 @@ class World:
 
         # Call initialize method for units.
         for unit in self.units.values():
+            unit.frame = self.frame
             unit.initialize()
 
         # TODO: replace tcod with other lib.

@@ -156,6 +156,8 @@ class VehicleUnit(UnitBase):
         self.unit_transport_cost = self.config.get("unit_transport_cost", 1)
         self.patient = self.max_patient
 
+        super().init_data_model()
+
     def step(self, tick: int):
         # If we have not arrive at destination yet.
         if self.steps > 0:
@@ -202,7 +204,12 @@ class VehicleUnit(UnitBase):
                     self._reset_internal_states()
 
     def flush_states(self):
-        pass
+        if self.payload > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "payload", self.payload)
+
+        # Flush if we have an order.
+        if self.quantity > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "patient", self.patient)
 
     def reset(self):
         super(VehicleUnit, self).reset()

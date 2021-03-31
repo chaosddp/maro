@@ -73,10 +73,10 @@ class SupplyChainBusinessEngine(AbsBusinessEngine):
             facility.step(tick)
 
         # Then flush states to frame before generate decision event.
-        # for facility in self.world.facilities.values():
-        #     facility.flush_states()
+        for facility in self.world.facilities.values():
+            facility.flush_states()
 
-        self._frame.collect_states()
+        # self._frame.collect_states()
 
     def _post_step_by_facility(self, tick: int):
         """Call post_step functions by facility."""

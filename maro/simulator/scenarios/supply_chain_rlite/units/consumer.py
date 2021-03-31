@@ -66,6 +66,7 @@ class ConsumerUnit(SkuUnit):
             original_quantity (int): How many we ordered.
         """
         self.received += quantity
+        self.total_received += quantity
 
         self.update_open_orders(source_id, product_id, -original_quantity)
 
@@ -119,7 +120,8 @@ class ConsumerUnit(SkuUnit):
             if len(self.sources) == 0:
                 warnings.warn(
                     f"No sources for consumer: {self.id}, sku: {self.product_id} in facility: {self.facility.name}.")
-                return
+
+        super().init_data_model()
 
     def step(self, tick: int):
         # NOTE: id == 0 means invalid,as our id is 1 based.
@@ -144,7 +146,16 @@ class ConsumerUnit(SkuUnit):
         self.total_purchased += self.purchased
 
     def flush_states(self):
-        pass
+        if self.received > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "received", self.received)
+            self.frame.update(self.data_model_name, self.data_model_index, self, "total_received", self.total_received)
+
+        if self.purchased > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "purchased", self.purchased)
+            self.frame.update(self.data_model_name, self.data_model_index, self, "total_purchased", self.total_purchased)
+
+        if self.order_cost > 0:
+            self.frame.update(self.data_model_name, self.data_model_index, self, "order_product_cost", self.order_product_cost)
 
     def post_step(self, tick: int):
         # Clear the action states per step.

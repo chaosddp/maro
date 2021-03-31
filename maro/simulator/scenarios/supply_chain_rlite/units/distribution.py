@@ -96,6 +96,8 @@ class DistributionUnit(UnitBase):
 
             index += 1
 
+        super().init_data_model()
+
     def step(self, tick: int):
         for vehicle in self.vehicles:
             # If we have vehicle not on the way and there is any pending order
@@ -124,7 +126,8 @@ class DistributionUnit(UnitBase):
                 "delay_order_penalty")
 
     def flush_states(self):
-        pass
+        for vehicle in self.vehicles:
+            vehicle.flush_states()
 
     def reset(self):
         super(DistributionUnit, self).reset()
